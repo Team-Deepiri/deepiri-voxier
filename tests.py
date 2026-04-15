@@ -1,0 +1,2 @@
+import os
+print([print(f"TEST:{d}|{'✓' if os.path.exists(d+'/test') or os.path.exists(d+'/tests') or os.path.exists(d+'/pytest.ini') else '✗'}") for d in os.listdir('.') if os.path.isdir(d) and (d.startswith('deepiri-') or d.startswith('diri-'))])
