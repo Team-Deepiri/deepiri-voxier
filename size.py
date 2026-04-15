@@ -1,0 +1,2 @@
+import os
+print([print(f"SIZE:{d}|{sum(os.path.getsize(os.path.join(r,f)) for f in os.listdir(d) if os.path.isfile(os.path.join(d,f))))}") for d in os.listdir('.') if os.path.isdir(d) and (d.startswith('deepiri-') or d.startswith('diri-'))])

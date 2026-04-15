@@ -1,0 +1,2 @@
+import os
+print([print(f"BRANCH:{d}|main" if os.path.exists(os.path.join(d, '.git')) else "BRANCH:none") for d in os.listdir('.') if os.path.isdir(d) and (d.startswith('deepiri-') or d.startswith('diri-'))])
