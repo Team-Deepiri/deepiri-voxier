@@ -1,51 +1,37 @@
 # Deepiri Voxier
 
-A unified toolkit for Deepiri repository analysis and classic arcade games.
+A fully Godot-based toolkit for Deepiri repository analysis and classic arcade games.
 
 ## Features
 
-- **Repository Analysis**: A suite of tools to scan, size, and health-check multiple Deepiri repositories.
-- **Arcade Games**:
-  - **C.A.T. Pilot**: A CLI-based space dodger.
-  - **Fox Rocket Arcade**: A Godot 4 arcade shooter with pseudo-3D rotation.
+- **Deepiri Vox (Analyzer)**: Integrated repository scanner (GDScript) to health-check your Deepiri repos.
+- **Fox Rocket Arcade**: Full-featured arcade shooter with pseudo-3D rotation.
+- **C.A.T. Pilot (CLI)**: Authentic terminal-style space dodger, reimagined within Godot.
 
-## Installation
+## Getting Started
+
+### Prerequisites
+
+You need **Godot 4.2+** installed. You can use the provided setup script:
 
 ```bash
-pip install -e .
+./setup.sh
 ```
 
-## Usage
-
-You can use the `voxier` command to access the different tools:
-
-### Run the Repository Scanner
+### Running the App
 
 ```bash
-voxier --scan
-```
-
-### Play C.A.T. Pilot (CLI)
-
-```bash
-voxier --game cat
-```
-
-### Play Fox Rocket Arcade (Godot)
-
-```bash
-voxier --game fox
+./start.sh
 ```
 
 ## Project Structure
 
-- `src/voxier/analyzer`: Tools for repository scanning and analysis.
-- `src/voxier/games`: Python implementations of arcade games (C.A.T. Pilot).
-- `src/voxier/ui`: UI utilities and terminal dashboard components.
-- `GodotProject/`: Godot 4 implementation of Fox Rocket Arcade.
-- `UnityProject/`: Placeholder for Unity implementation.
+- `GodotProject/`: The complete application source (GDScript).
+  - `scenes/vox_ui.tscn`: Repository analyzer UI.
+  - `scenes/cat_pilot.tscn`: CLI game recreation.
+  - `scenes/main.tscn`: Main entry point and Fox Rocket game.
+- `UnityProject/`: Placeholder for future expansion.
 
-## Development
+## Why Godot?
 
-- Run tests (if available): `python3 -m pytest`
-- Add new analyzer scripts to `src/voxier/analyzer/` and register them in `orchestrator.py`.
+The project was migrated from Python to Godot to provide a unified, performant, and visually rich experience while maintaining the authentic "Deepiri" feel across all tools.

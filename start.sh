@@ -9,7 +9,7 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$SCRIPT_DIR/GodotProject"
 
-echo -e "${GREEN}🚀 Starting Fox Rocket Arcade...${NC}"
+echo -e "${GREEN}🚀 Starting Deepiri Voxier (Godot)...${NC}"
 echo ""
 
 # Check for Godot
@@ -20,7 +20,7 @@ fi
 
 # Check for project
 if [ ! -f "$PROJECT_DIR/project.godot" ]; then
-    echo -e "${RED}Project not found! Run ./setup.sh first.${NC}"
+    echo -e "${RED}Project not found!${NC}"
     exit 1
 fi
 
