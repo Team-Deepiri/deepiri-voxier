@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepiri-voxier"
+version = "0.1.0"
+description = "A unified tool for deepiri repository analysis and arcade games"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [],
+
+
+[project.scripts]
+voxier = "voxier.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
