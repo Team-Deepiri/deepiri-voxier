@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://scanlinefx"]
+
+[ext_resource type="Shader" path="res://shaders/scanlines.gdshader" id="1_scan"]
+[ext_resource type="Script" path="res://scripts/fx/crt_overlay_controller.gd" id="2_ctl"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_scan"]
+shader = ExtResource("1_scan")
+shader_parameter/line_density = 260.0
+shader_parameter/opacity = 0.07
+
+[node name="ScanlineLayer" type="ColorRect"]
+material = SubResource("ShaderMaterial_scan")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
+script = ExtResource("2_ctl")

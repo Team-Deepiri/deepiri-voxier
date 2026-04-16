@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://vignettefx"]
+
+[ext_resource type="Shader" path="res://shaders/vignette.gdshader" id="1_vig"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vig"]
+shader = ExtResource("1_vig")
+shader_parameter/strength = 0.28
+
+[node name="VignetteLayer" type="ColorRect"]
+material = SubResource("ShaderMaterial_vig")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
