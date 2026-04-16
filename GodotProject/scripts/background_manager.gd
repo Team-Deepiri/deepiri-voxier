@@ -58,9 +58,7 @@ func build_default_trees():
 		var tree = Polygon2D.new()
 		tree.color = Color(0.05, 0.2, 0.05)
 		var h = randf_range(60, 120)
-		tree.polygon = PackedVector2Array([
-			Vector2(-20, 0), Vector2(0, -h), Vector2(20, 0)
-		])
+		tree.polygon = PackedVector2Array([Vector2(-20, 0), Vector2(0, -h), Vector2(20, 0)])
 		tree.position = Vector2(i * 70 + randf_range(-20, 20), randf_range(450, 550))
 		trees_container.add_child(tree)
 
