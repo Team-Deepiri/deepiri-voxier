@@ -1,6 +1,6 @@
 # Deepiri Voxier
 
-A fully Godot-based toolkit for Deepiri repository analysis and classic arcade games.
+A fully Godot-based toolkit made by Deepiri for making classic arcade games.
 
 ## Features
 
