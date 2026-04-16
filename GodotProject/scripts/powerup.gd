@@ -23,10 +23,12 @@ func _process(delta):
 	if position.y > 620:
 		queue_free()
 
-func collect():
+func collect() -> void:
+	EventBus.sfx_requested.emit(&"pickup")
 	GameManager.add_score(50)
 	queue_free()
 
-func _on_area_entered(area):
-	if area.is_in_group("player"):
+func _on_area_entered(area: Area2D) -> void:
+	var p := area.get_parent()
+	if p and p.is_in_group("player"):
 		collect()
