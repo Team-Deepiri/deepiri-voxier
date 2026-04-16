@@ -1,78 +1,67 @@
 extends Node
 
-const SPAWN_INTERVAL := 2.0
-const MIN_SPAWN_INTERVAL := 0.5
-const MAX_ENEMIES := 20
+const MAX_ENEMIES := 18
+const SPAWN_INTERVAL := 1.85
+const MIN_INTERVAL := 0.42
 
-var current_interval := SPAWN_INTERVAL
-var last_spawn_time := 0.0
+var spawn_timer := 0.0
 var difficulty := 1.0
-var difficulty_rate := 0.1
-var is_spawning := false
 var active_count := 0
+var is_spawning := false
 
-@onready var scene = get_tree().current_scene
-
-func _ready():
+func _ready() -> void:
 	add_to_group("enemy_spawner")
 
-
-func _process(delta):
-	if not is_spawning or GameManager.game_state != GameManager.STATE_PLAYING:
+func _process(delta: float) -> void:
+	if not is_spawning or GameManager.state != GameManager.GameState.PLAYING:
 		return
-	
-	var current_time = Time.get_ticks_msec() / 1000.0
-	if current_time - last_spawn_time >= current_interval:
+	spawn_timer -= delta
+	if spawn_timer <= 0:
 		spawn_enemy()
-		last_spawn_time = current_time
-	
-	difficulty += difficulty_rate * delta
-	current_interval = max(MIN_SPAWN_INTERVAL, SPAWN_INTERVAL - difficulty * 0.02)
+		spawn_timer = max(MIN_INTERVAL, SPAWN_INTERVAL - difficulty * 0.035)
+		difficulty += 0.04 * delta
 
-
-func start_spawning():
+func start_spawning() -> void:
 	is_spawning = true
+	spawn_timer = 0.15
 	difficulty = 1.0
-	current_interval = SPAWN_INTERVAL
-	last_spawn_time = 0.0
 
-
-func stop_spawning():
+func stop_spawning() -> void:
 	is_spawning = false
 
-
-func spawn_enemy():
+func spawn_enemy() -> void:
 	if active_count >= MAX_ENEMIES:
 		return
-	
-	var enemy_type = get_weighted_random()
-	var enemy = preload("res://scenes/enemy.tscn").instantiate()
-	enemy.enemy_type = enemy_type
-	
-	var spawn_x = randf_range(50, 750)
-	enemy.position = Vector2(spawn_x, -30)
-	
+	var scene := get_tree().current_scene
+	if scene == null:
+		return
+	var etype := get_weighted_type()
+	var enemy: Area2D = preload("res://scenes/enemy.tscn").instantiate()
+	enemy.position = Vector2(randf_range(50, 750), -40)
+	enemy.enemy_type = etype
 	scene.add_child(enemy)
 	active_count += 1
-	
-	enemy.destroyed.connect(_on_enemy_destroyed)
+	enemy.tree_exiting.connect(_on_enemy_left_tree)
 
+func _on_enemy_left_tree() -> void:
+	active_count = maxi(0, active_count - 1)
 
-func get_weighted_random() -> int:
-	var r = randf()
-	if difficulty < 3:
-		if r < 0.7: return 0
-		elif r < 0.95: return 1
+func get_weighted_type() -> int:
+	var r := randf()
+	if difficulty < 3.5:
+		if r < 0.68:
+			return 0
+		if r < 0.93:
+			return 1
 		return 2
-	elif difficulty < 6:
-		if r < 0.5: return 0
-		elif r < 0.85: return 1
+	elif difficulty < 7.0:
+		if r < 0.52:
+			return 0
+		if r < 0.82:
+			return 1
 		return 2
-	else:
-		if r < 0.4: return 0
-		elif r < 0.7: return 1
-		return 2
-
-
-func _on_enemy_destroyed(_points):
-	active_count = max(0, active_count - 1)
+	if r < 0.38:
+		return 0
+	if r < 0.72:
+		return 1
+	return 2
