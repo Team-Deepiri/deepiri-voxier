@@ -1,0 +1,12 @@
+# Godot cache
+GodotProject/.godot/
+
+# Builds / exports
+GodotProject/build/
+
+# Archives
+*.tar.gz
+
+# Python cache
+__pycache__/
+*.pyc
