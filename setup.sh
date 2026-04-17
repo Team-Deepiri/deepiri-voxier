@@ -15,6 +15,60 @@ echo -e "${GREEN}Voxier — Setup${NC}"
 echo ""
 
 # ============================================
+# PART 0: Linux system libraries (Godot audio / runtime)
+# ============================================
+
+install_linux_godot_runtime() {
+	if [ "$(uname -s)" != "Linux" ]; then
+		return 0
+	fi
+	if ! command -v sudo &> /dev/null; then
+		echo -e "${YELLOW}No sudo: skip system packages. If Godot warns about audio, install ALSA/Pulse for your distro.${NC}"
+		return 0
+	fi
+
+	echo -e "${BLUE}Installing Linux runtime libs for Godot (audio, etc.)…${NC}"
+
+	if command -v apt-get &> /dev/null; then
+		export DEBIAN_FRONTEND=noninteractive
+		if sudo apt-get update -qq; then
+			if sudo apt-get install -y libasound2 libpulse0 2>/dev/null; then
+				echo -e "${GREEN}✓ apt: libasound2, libpulse0${NC}"
+			elif sudo apt-get install -y libasound2t64 libpulse0 2>/dev/null; then
+				echo -e "${GREEN}✓ apt: libasound2t64, libpulse0${NC}"
+			else
+				echo -e "${YELLOW}apt install failed; try: sudo apt-get install -y libasound2 libpulse0${NC}"
+			fi
+		else
+			echo -e "${YELLOW}apt-get update failed (offline?). Install libasound2 / libpulse0 when online.${NC}"
+		fi
+	elif command -v dnf &> /dev/null; then
+		if sudo dnf install -y alsa-lib pulseaudio-libs; then
+			echo -e "${GREEN}✓ dnf: alsa-lib, pulseaudio-libs${NC}"
+		else
+			echo -e "${YELLOW}dnf install failed; try: sudo dnf install -y alsa-lib pulseaudio-libs${NC}"
+		fi
+	elif command -v pacman &> /dev/null; then
+		if sudo pacman -S --needed --noconfirm alsa-lib libpulse; then
+			echo -e "${GREEN}✓ pacman: alsa-lib, libpulse${NC}"
+		else
+			echo -e "${YELLOW}pacman install failed; try: sudo pacman -S alsa-lib libpulse${NC}"
+		fi
+	elif command -v zypper &> /dev/null; then
+		if sudo zypper install -y libasound2 libpulse0; then
+			echo -e "${GREEN}✓ zypper: libasound2, libpulse0${NC}"
+		else
+			echo -e "${YELLOW}zypper install failed.${NC}"
+		fi
+	else
+		echo -e "${YELLOW}Unknown package manager. Godot may need ALSA/Pulse libraries — see Godot Linux export docs.${NC}"
+	fi
+}
+
+install_linux_godot_runtime || true
+echo ""
+
+# ============================================
 # PART 1: Install Godot
 # ============================================
 
