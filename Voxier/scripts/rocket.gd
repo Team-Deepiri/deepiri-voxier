@@ -23,32 +23,32 @@ func _ensure_rocket_visuals() -> void:
 	var body := Polygon2D.new()
 	body.name = "Body"
 	body.color = Color(0.95, 0.38, 0.16, 1)
-	body.polygon = PackedVector2Array(
+	body.polygon = PackedVector2Array([
 		Vector2(-16, -28), Vector2(16, -28), Vector2(13, 28), Vector2(-13, 28)
-	)
+	])
 	add_child(body)
 	var stripe := Polygon2D.new()
 	stripe.name = "Stripe"
 	stripe.position = Vector2(0, 4)
 	stripe.color = Color(0.2, 0.55, 0.95, 1)
-	stripe.polygon = PackedVector2Array(
+	stripe.polygon = PackedVector2Array([
 		Vector2(-10, -4), Vector2(10, -4), Vector2(9, 4), Vector2(-9, 4)
-	)
+	])
 	add_child(stripe)
 	var window := Polygon2D.new()
 	window.name = "Window"
 	window.position = Vector2(0, -12)
 	window.color = Color(0.75, 0.88, 1, 1)
-	window.polygon = PackedVector2Array(
+	window.polygon = PackedVector2Array([
 		Vector2(-6, -6), Vector2(6, -6), Vector2(6, 6), Vector2(-6, 6)
-	)
+	])
 	add_child(window)
 	var fins := Polygon2D.new()
 	fins.name = "Fins"
 	fins.color = Color(0.72, 0.22, 0.12, 1)
-	fins.polygon = PackedVector2Array(
+	fins.polygon = PackedVector2Array([
 		Vector2(-22, 14), Vector2(-12, 14), Vector2(-12, 24), Vector2(-22, 24)
-	)
+	])
 	add_child(fins)
 	var finr := Polygon2D.new()
 	finr.name = "FinR"

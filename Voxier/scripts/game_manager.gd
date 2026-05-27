@@ -2,6 +2,7 @@ extends Node
 
 const _TUNE := preload("res://resources/game_tune_default.tres")
 const _ImpactParticles3D := preload("res://scripts/juice/impact_particles_3d.gd")
+const _Arena3D := preload("res://scripts/arcade3/arena_const.gd")
 
 enum GameState { MENU, PLAYING, PAUSED, GAME_OVER, FALLING, ROCKET_CHANGE }
 
@@ -13,11 +14,13 @@ func _set_state(next: GameState) -> void:
 		return
 	state = next
 	EventBus.game_state_changed.emit(state)
+
+
 var score := 0
 var lives := 3
 var tune = _TUNE
-var current_rocket: Node3D
-var new_rocket: Node3D
+var current_rocket: Node
+var new_rocket: Node
 var has_new_rocket := false
 var rocket_timer := 25.0
 var rocket_interval := 25.0
@@ -98,9 +101,9 @@ func start_game(reset_progress: bool = true) -> void:
 		player.falling = false
 		player.clear_hit_stun()
 
-	current_rocket = get_tree().get_first_node_in_group("rocket") as Node3D
+	current_rocket = get_tree().get_first_node_in_group("rocket")
 	if current_rocket and player:
-		current_rocket.global_position = player.global_position + Arena3D.ROCKET_MOUNT_OFFSET
+		current_rocket.global_position = player.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
 		current_rocket.activate()
 		player.mount_rocket(current_rocket)
 
@@ -146,7 +149,7 @@ func handle_falling(delta: float) -> void:
 			return
 		var p2 := Vector2(player.global_position.x, player.global_position.z)
 		var r2 := Vector2(new_rocket.global_position.x, new_rocket.global_position.z)
-		if p2.distance_to(r2) < Arena3D.RESCUE_LAND_RADIUS:
+		if p2.distance_to(r2) < _Arena3D.RESCUE_LAND_RADIUS:
 			catch_rocket()
 			return
 	if fall_height > max_fall_height:
@@ -159,7 +162,7 @@ func catch_rocket():
 	pickup_ttl = 0.0
 	EventBus.sfx_requested.emit(&"pickup")
 	current_rocket = new_rocket
-	current_rocket.global_position = player.global_position + Arena3D.ROCKET_MOUNT_OFFSET
+	current_rocket.global_position = player.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
 	current_rocket.activate()
 
 	player.mount_rocket(current_rocket)
@@ -232,7 +235,7 @@ func hop_to_rocket():
 		current_rocket.queue_free()
 
 	current_rocket = new_rocket
-	current_rocket.global_position = player.global_position + Arena3D.ROCKET_MOUNT_OFFSET
+	current_rocket.global_position = player.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
 	current_rocket.activate()
 
 	player.mount_rocket(current_rocket)

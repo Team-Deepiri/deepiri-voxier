@@ -88,11 +88,12 @@ func _build_music() -> void:
 		_AudioIds.MOOD_GAME: "res://audio/music/game_loop.ogg",
 		_AudioIds.MOOD_COMBAT: "res://audio/music/combat_loop.ogg",
 	}
-	for mood in tracks:
+	for mood_key in tracks.keys():
+		var mood: StringName = mood_key
 		var player := AudioStreamPlayer.new()
 		player.bus = _BusIds.MUSIC
 		player.volume_db = -14.0
-		var stream := _load_stream(tracks[mood])
+		var stream := _load_stream(String(tracks[mood]))
 		if stream:
 			_prepare_loop(stream)
 			player.stream = stream
@@ -104,8 +105,8 @@ func _build_warning_loop() -> void:
 	_warning_player = AudioStreamPlayer.new()
 	_warning_player.bus = _BusIds.SFX
 	_warning_player.volume_db = -8.0
-	var w := _streams.get(_AudioIds.WARNING, null)
-	if w:
+	var w: AudioStream = _streams.get(_AudioIds.WARNING) as AudioStream
+	if w != null:
 		_warning_player.stream = w
 	add_child(_warning_player)
 
@@ -175,7 +176,7 @@ func play_ui(id: StringName) -> void:
 
 
 func play_fire() -> void:
-	var id := _AudioIds.FIRE_ALT if _fire_alt_next else _AudioIds.FIRE
+	var id: StringName = _AudioIds.FIRE_ALT if _fire_alt_next else _AudioIds.FIRE
 	_fire_alt_next = not _fire_alt_next
 	play_sfx(id)
 
@@ -208,10 +209,11 @@ func _crossfade_music(mood: StringName) -> void:
 		_music_tween.kill()
 	_music_tween = create_tween()
 	_music_tween.set_parallel(true)
-	for key in _music_layers:
+	for key_variant in _music_layers.keys():
+		var key: StringName = key_variant
 		var player: AudioStreamPlayer = _music_layers[key]
 		var target_db := -80.0
-		var should_play := key == mood
+		var should_play: bool = key == mood
 		if mood == _AudioIds.MOOD_GAME_OVER and key == _AudioIds.MOOD_GAME:
 			should_play = true
 			target_db = -22.0
@@ -247,7 +249,9 @@ func _tick_combat_music() -> void:
 
 func _tick_warning_pulse(delta: float) -> void:
 	var gm := get_node_or_null("/root/GameManager")
-	var falling := gm != null and gm.state == gm.GameState.FALLING and gm.has_new_rocket
+	var falling: bool = (
+		gm != null and gm.state == gm.GameState.FALLING and gm.has_new_rocket
+	)
 	if not falling or not audio_enabled:
 		if _warning_player.playing:
 			_warning_player.stop()
@@ -266,13 +270,13 @@ func _on_sfx_requested(id: StringName) -> void:
 
 
 func _play_sfx(id: StringName, volume_offset_db: float = 0.0) -> void:
-	var stream: AudioStream = _streams.get(id, null)
+	var stream: AudioStream = _streams.get(id) as AudioStream
 	if stream == null:
 		return
 	var def: Dictionary = _defs.get(id, {})
-	var bus: StringName = def.get("bus", _BusIds.SFX)
+	var bus: StringName = def.get("bus", _BusIds.SFX) as StringName
 	var vol: float = float(def.get("vol", 0.0)) + volume_offset_db
-	var pitch_rng: Array = def.get("pitch", [1.0, 1.0])
+	var pitch_rng: Array = def.get("pitch", [1.0, 1.0]) as Array
 	var ps := randf_range(float(pitch_rng[0]), float(pitch_rng[1]))
 	_play_one_shot(stream, bus, vol, ps)
 
