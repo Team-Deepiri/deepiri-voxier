@@ -24,6 +24,7 @@ func _ready():
 	start_mission(1)
 
 func start_mission(level_num):
+	EventBus.sfx_requested.emit(&"game_start")
 	current_level = level_num
 	score = 0
 	turn = 0
@@ -60,6 +61,7 @@ func _on_game_timer_timeout():
 			break
 	
 	if hit:
+		EventBus.sfx_requested.emit(&"hurt")
 		game_over()
 		return
 	
@@ -124,15 +126,18 @@ func _input(event):
 		draw_game()
 	elif event is InputEventKey and event.keycode == KEY_Q:
 		game_active = false
+		EventBus.sfx_requested.emit(&"ui_back")
 		get_tree().change_scene_to_file(_Scenes.MAIN)
 
 func game_over():
 	game_active = false
+	EventBus.sfx_requested.emit(&"game_over")
 	ui_label.text += "\nCRITICAL FAILURE! COLLISION DETECTED!\nFinal Score: %d" % score
 	game_timer.stop()
 
 func complete_mission():
 	game_active = false
+	EventBus.sfx_requested.emit(&"pickup")
 	score += 100
 	ui_label.text += "\n★ MISSION COMPLETE! ★\nFinal Score: %d" % score
 	game_timer.stop()

@@ -34,6 +34,10 @@ func stop_spawning() -> void:
 	is_spawning = false
 
 
+func get_active_enemy_count() -> int:
+	return active_count
+
+
 func spawn_enemy() -> void:
 	if active_count >= MAX_ENEMIES:
 		return

@@ -6,6 +6,13 @@ const _ImpactParticles3D := preload("res://scripts/juice/impact_particles_3d.gd"
 enum GameState { MENU, PLAYING, PAUSED, GAME_OVER, FALLING, ROCKET_CHANGE }
 
 var state := GameState.MENU
+
+
+func _set_state(next: GameState) -> void:
+	if state == next:
+		return
+	state = next
+	EventBus.game_state_changed.emit(state)
 var score := 0
 var lives := 3
 var tune = _TUNE
@@ -35,6 +42,11 @@ var enemy_spawner: Node
 
 func _ready():
 	call_deferred("_bind_scene_nodes")
+	call_deferred("_emit_initial_state")
+
+
+func _emit_initial_state() -> void:
+	EventBus.game_state_changed.emit(state)
 
 
 func _bind_scene_nodes() -> void:
@@ -67,7 +79,8 @@ func start_game(reset_progress: bool = true) -> void:
 	if ui_score == null:
 		_bind_scene_nodes()
 	
-	state = GameState.PLAYING
+	_set_state(GameState.PLAYING)
+	EventBus.sfx_requested.emit(&"game_start")
 	if reset_progress:
 		score = tune.starting_score
 		lives = tune.starting_lives
@@ -102,7 +115,7 @@ func start_game(reset_progress: bool = true) -> void:
 
 
 func game_over():
-	state = GameState.GAME_OVER
+	_set_state(GameState.GAME_OVER)
 	ui_finalscore.text = "SCORE: " + str(score)
 	ui_gameover.visible = true
 
@@ -118,7 +131,7 @@ func on_rocket_exploded():
 	if player:
 		player.dismount_rocket()
 		player.falling = true
-		state = GameState.FALLING
+		_set_state(GameState.FALLING)
 		fall_height = 0.0
 
 
@@ -159,7 +172,7 @@ func catch_rocket():
 
 	ui_rocket_warning.visible = false
 
-	state = GameState.PLAYING
+	_set_state(GameState.PLAYING)
 
 	if lives <= 0:
 		game_over()
@@ -176,7 +189,7 @@ func lose_life():
 	ui_rocket_warning.visible = false
 
 	if lives <= 0:
-		state = GameState.GAME_OVER
+		_set_state(GameState.GAME_OVER)
 		ui_finalscore.text = "SCORE: " + str(score)
 		ui_gameover.visible = true
 	else:
@@ -203,6 +216,7 @@ func on_player_hit() -> void:
 
 
 func player_die_game_over() -> void:
+	EventBus.sfx_requested.emit(&"player_die")
 	if player:
 		player.die_visual_only()
 	game_over()
@@ -231,7 +245,7 @@ func hop_to_rocket():
 
 	ui_rocket_warning.visible = false
 
-	state = GameState.PLAYING
+	_set_state(GameState.PLAYING)
 
 	if player:
 		player._mesh
@@ -243,6 +257,7 @@ func hop_to_rocket():
 
 
 func missed_rocket():
+	EventBus.sfx_requested.emit(&"miss")
 	if new_rocket:
 		new_rocket.queue_free()
 	lose_life()

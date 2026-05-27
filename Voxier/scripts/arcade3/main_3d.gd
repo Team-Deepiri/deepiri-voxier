@@ -1,12 +1,15 @@
 extends Node3D
 
 const _Scenes := preload("res://scripts/ui/scene_registry.gd")
+const _UiAudio := preload("res://scripts/audio/ui_audio.gd")
 
 @onready var vox_btn: Button = $UI/StartPanel/VBox/VoxBtn
 @onready var cat_btn: Button = $UI/StartPanel/VBox/CatBtn
+@onready var _ui_root: Control = $UI
 
 
 func _ready() -> void:
+	_UiAudio.wire_buttons_in(_ui_root)
 	vox_btn.pressed.connect(_on_vox_pressed)
 	cat_btn.pressed.connect(_on_cat_pressed)
 
