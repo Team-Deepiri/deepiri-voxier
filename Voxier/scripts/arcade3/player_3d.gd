@@ -11,6 +11,9 @@ var falling := false
 var _fire_cd := 0.0
 var _invuln := 0.0
 var _hero: Sprite3D
+@onready var _mesh: MeshInstance3D = $MeshInstance3D
+var _mesh_mat: StandardMaterial3D
+#mesh mat to add color/flashes without changing texture
 
 @onready var fire_point: Marker3D = $FirePoint
 
@@ -18,7 +21,17 @@ var _hero: Sprite3D
 func _ready() -> void:
 	add_to_group("player")
 	_setup_hero_sprite()
+	call_deferred("_setup_material")
 
+#set up the mesh_mat for the damage indicator
+func _setup_material() -> void:
+	var mat := StandardMaterial3D.new()
+	mat.flags_transparent = true
+	mat.albedo_color = Color.WHITE
+	
+	for i in _mesh.get_surface_override_material_count():
+		_mesh.set_surface_override_material(i, mat)
+	_mesh_mat = mat
 
 func _setup_hero_sprite() -> void:
 	_hero = Sprite3D.new()
@@ -44,14 +57,14 @@ func apply_hit_stun() -> void:
 	_invuln = 2.1
 	var tw := create_tween()
 	for _i in range(9):
-		tw.tween_property(self, "modulate:a", 0.28, 0.07)
-		tw.tween_property(self, "modulate:a", 1.0, 0.07)
-	tw.tween_callback(func(): modulate = Color(1, 1, 1, 1))
-
+		tw.tween_property(_mesh_mat, "albedo_color:a", 0.28, 0.07)
+		tw.tween_property(_mesh_mat, "albedo_color:a", 1.0, 0.07)
+	tw.tween_callback(func(): _mesh_mat.albedo_color = Color(1, 1, 1, 1))
 
 func clear_hit_stun() -> void:
 	_invuln = 0.0
-	modulate = Color(1, 1, 1, 1)
+	if _mesh_mat:
+		_mesh_mat.albedo_color = Color(1, 1, 1, 1)
 
 
 func _physics_process(delta: float) -> void:
@@ -134,7 +147,8 @@ func revive() -> void:
 		_hero.visible = true
 	falling = false
 	global_position = Arena3D.PLAYER_START
-	modulate = Color.WHITE
+	if _mesh_mat:
+		_mesh_mat.albedo_color = Color.WHITE
 	_invuln = 0.0
 
 
@@ -145,3 +159,9 @@ func _on_hurt_area_entered(area: Area3D) -> void:
 		return
 	if area.is_in_group("enemy") or area.is_in_group("enemy_bullet"):
 		GameManager.on_player_hit()
+
+
+#Allows the color to be changed externally, such as in the GameManager
+func set_tint(color: Color) -> void:
+	if _mesh_mat:
+		_mesh_mat.albedo_color = color
