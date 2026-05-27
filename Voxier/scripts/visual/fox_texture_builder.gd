@@ -116,7 +116,7 @@ static func _outline(img: Image) -> void:
 	var copy := img.duplicate()
 	for y in range(1, H - 1):
 		for x in range(1, W - 1):
-			var c := copy.get_pixel(x, y)
+			var c = copy.get_pixel(x, y)
 			if c.a < 0.25:
 				continue
 			var nbr := 0

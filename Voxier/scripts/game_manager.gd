@@ -63,6 +63,10 @@ func _process(delta: float) -> void:
 
 
 func start_game(reset_progress: bool = true) -> void:
+	#Rebind the nodes after restart, only catches after scene changes
+	if ui_score == null:
+		_bind_scene_nodes()
+	
 	state = GameState.PLAYING
 	if reset_progress:
 		score = tune.starting_score
@@ -230,9 +234,10 @@ func hop_to_rocket():
 	state = GameState.PLAYING
 
 	if player:
-		player.modulate = Color(1.15, 1.12, 1.05, 1)
+		player._mesh
+		player.set_tint(Color(1.15, 1.12, 1.05, 1))
 		var tw := player.create_tween()
-		tw.tween_property(player, "modulate", Color.WHITE, 0.22)
+		tw.tween_property(player._mesh_mat, "albedo_color", Color.WHITE, 0.22)
 	if background_manager and background_manager.has_method("cycle_background"):
 		background_manager.cycle_background()
 
@@ -261,3 +266,4 @@ func update_ui():
 
 func restart():
 	get_tree().reload_current_scene()
+	

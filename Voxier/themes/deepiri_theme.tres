@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=2 format=3]
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://r0b07js5vg14"]
 
 [sub_resource type="StyleBoxFlat" id="btn_base"]
 bg_color = Color(0.12, 0.06, 0.22, 0.95)
@@ -17,6 +17,6 @@ default_font_size = 17
 Button/colors/font_color = Color(0.96, 0.93, 1, 1)
 Button/colors/font_hover_color = Color(1, 0.72, 0.4, 1)
 Button/colors/font_pressed_color = Color(0.75, 1, 0.92, 1)
-Button/styles/normal = SubResource("btn_base")
 Button/styles/hover = SubResource("btn_base")
+Button/styles/normal = SubResource("btn_base")
 Button/styles/pressed = SubResource("btn_base")
