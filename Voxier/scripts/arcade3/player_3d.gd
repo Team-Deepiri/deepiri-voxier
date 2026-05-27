@@ -108,7 +108,7 @@ func _physics_process(delta: float) -> void:
 
 
 func fire() -> void:
-	EventBus.sfx_requested.emit(&"fire")
+	GameAudio.play_fire()
 	var bullet: Area3D = load("res://scenes/bullet_3d.tscn").instantiate()
 	var arena := get_tree().current_scene.get_node_or_null("%Arena") as Node3D
 	if arena == null:

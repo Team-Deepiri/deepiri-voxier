@@ -71,7 +71,7 @@ func finish_rotation() -> void:
 	if current_dir % 2 == 0:
 		GameManager.add_score(200)
 		EventBus.camera_shake_requested.emit(0.18)
-		EventBus.sfx_requested.emit(&"bonus")
+		EventBus.sfx_requested.emit(&"rotate")
 
 func get_direction_name() -> String:
 	return DIRECTION_NAMES[current_dir]

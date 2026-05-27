@@ -76,7 +76,7 @@ func _physics_process(delta: float) -> void:
 		_fire_cd = FIRE_COOLDOWN
 
 func fire() -> void:
-	EventBus.sfx_requested.emit(&"fire")
+	GameAudio.play_fire()
 	var bullet: Area2D = load("res://scenes/bullet.tscn").instantiate()
 	bullet.position = fire_point.global_position
 	bullet.is_player_bullet = true
