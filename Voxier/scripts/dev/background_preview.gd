@@ -16,6 +16,6 @@ func _input(event: InputEvent) -> void:
 			_bg.cycle_background()
 	elif event is InputEventKey and event.pressed:
 		if event.keycode >= KEY_1 and event.keycode <= KEY_4:
-			var idx := event.keycode - KEY_1
+			var idx: int = int(event.keycode) - KEY_1
 			if _bg and _bg.has_method("set_background"):
 				_bg.set_background(idx)

@@ -28,7 +28,8 @@ func _process(delta: float) -> void:
 	var pl := GameManager.player
 	if st == GameManager.GameState.PLAYING or st == GameManager.GameState.FALLING:
 		if pl and is_instance_valid(pl):
-			follow = pl.global_position + FOLLOW_OFFSET
+			var gp := pl.global_position
+			follow = Vector2(gp.x, gp.y) + FOLLOW_OFFSET
 	position = position.lerp(follow, 1.0 - exp(-4.25 * delta))
 
 	var target_zoom := _BASE_ZOOM
