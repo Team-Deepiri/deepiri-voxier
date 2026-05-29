@@ -3,9 +3,9 @@ extends Node3D
 const _Scenes := preload("res://scripts/ui/scene_registry.gd")
 const _UiAudio := preload("res://scripts/audio/ui_audio.gd")
 
-@onready var vox_btn: Button = $UI/StartPanel/VBox/VoxBtn
-@onready var cat_btn: Button = $UI/StartPanel/VBox/CatBtn
-@onready var _ui_root: Control = $UI
+@onready var vox_btn: Button = $UI/Control/StartPanel/VBox/VoxBtn
+@onready var cat_btn: Button = $UI/Control/StartPanel/VBox/CatBtn
+@onready var _ui_root: CanvasLayer = $UI
 
 
 func _ready() -> void:
