@@ -11,7 +11,19 @@ func read_int(key: String, fallback: int) -> int:
 		return fallback
 	return int(c.get_value("app", key, fallback))
 
+func read_float(key: String, fallback: float) -> float:
+	var c := ConfigFile.new()
+	if c.load(_path) != OK:
+		return fallback
+	return float(c.get_value("app", key, fallback))
+
 func write_int(key: String, value: int) -> void:
+	var c := ConfigFile.new()
+	c.load(_path)
+	c.set_value("app", key, value)
+	c.save(_path)
+
+func write_float(key: String, value: float) -> void:
 	var c := ConfigFile.new()
 	c.load(_path)
 	c.set_value("app", key, value)

@@ -34,6 +34,10 @@ func stop_spawning() -> void:
 	is_spawning = false
 
 
+func get_active_enemy_count() -> int:
+	return active_count
+
+
 func spawn_enemy() -> void:
 	if active_count >= MAX_ENEMIES:
 		return
@@ -45,13 +49,14 @@ func spawn_enemy() -> void:
 		return
 	var etype := get_weighted_type()
 	var enemy: Area3D = load("res://scenes/enemy_3d.tscn").instantiate()
+	arena.add_child(enemy)
 	enemy.global_position = Vector3(
 		randf_range(Arena3D.X_MIN + 0.5, Arena3D.X_MAX - 0.5),
 		0.5,
 		randf_range(Arena3D.Z_ENEMY_SPAWN_MIN, Arena3D.Z_ENEMY_SPAWN_MAX)
 	)
 	enemy.enemy_type = etype
-	arena.add_child(enemy)
+	
 	active_count += 1
 	enemy.tree_exiting.connect(_on_enemy_left_tree)
 

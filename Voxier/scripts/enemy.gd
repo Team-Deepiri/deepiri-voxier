@@ -73,6 +73,7 @@ func _physics_process(delta: float) -> void:
 
 func take_damage(dmg: int) -> void:
 	health -= dmg
+	EventBus.sfx_requested.emit(&"hit")
 	_flash_hit()
 	if health <= 0:
 		die()

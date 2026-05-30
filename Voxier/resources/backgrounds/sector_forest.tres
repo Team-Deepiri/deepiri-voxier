@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="BackgroundProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/background_profile.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Bio Void"
+biome_id = 3
+sky_top_color = Color(0.04, 0.18, 0.1, 1)
+sky_bottom_color = Color(0.11, 0.31, 0.18, 1)
+nebula_tint = Color(0.08, 0.42, 0.28, 1)
+nebula_strength = 0.58
+star_density = 0.995
+star_scroll_speed = 0.13
+ambient_color = Color(0.32, 0.55, 0.42, 1)
+ambient_energy = 0.58
+fog_enabled = true
+fog_color = Color(0.06, 0.16, 0.1, 1)
+fog_density = 0.017
+floor_color = Color(0.05, 0.14, 0.09, 1)
+floor_grid_tint = Color(0.18, 0.48, 0.32, 1)
+floor_scroll_speed = 0.08
+star_count = 100
+star_color = Color(0.75, 1, 0.82, 1)
+layer_back = Color(0.04, 0.18, 0.1, 1)
+layer_mid = Color(0.11, 0.31, 0.18, 1)
+layer_fg = Color(0, 0.05, 0.02, 0.3)
+show_forest_silhouette = true

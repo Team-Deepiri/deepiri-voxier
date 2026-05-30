@@ -2,15 +2,25 @@ extends Node
 
 const _TUNE := preload("res://resources/game_tune_default.tres")
 const _ImpactParticles3D := preload("res://scripts/juice/impact_particles_3d.gd")
+const _Arena3D := preload("res://scripts/arcade3/arena_const.gd")
 
 enum GameState { MENU, PLAYING, PAUSED, GAME_OVER, FALLING, ROCKET_CHANGE }
 
 var state := GameState.MENU
+
+
+func _set_state(next: GameState) -> void:
+	if state == next:
+		return
+	state = next
+	EventBus.game_state_changed.emit(state)
+
+
 var score := 0
 var lives := 3
 var tune = _TUNE
-var current_rocket: Node3D
-var new_rocket: Node3D
+var current_rocket: Node
+var new_rocket: Node
 var has_new_rocket := false
 var rocket_timer := 25.0
 var rocket_interval := 25.0
@@ -35,6 +45,11 @@ var enemy_spawner: Node
 
 func _ready():
 	call_deferred("_bind_scene_nodes")
+	call_deferred("_emit_initial_state")
+
+
+func _emit_initial_state() -> void:
+	EventBus.game_state_changed.emit(state)
 
 
 func _bind_scene_nodes() -> void:
@@ -63,7 +78,12 @@ func _process(delta: float) -> void:
 
 
 func start_game(reset_progress: bool = true) -> void:
-	state = GameState.PLAYING
+	#Rebind the nodes after restart, only catches after scene changes
+	if ui_score == null:
+		_bind_scene_nodes()
+	
+	_set_state(GameState.PLAYING)
+	EventBus.sfx_requested.emit(&"game_start")
 	if reset_progress:
 		score = tune.starting_score
 		lives = tune.starting_lives
@@ -81,9 +101,9 @@ func start_game(reset_progress: bool = true) -> void:
 		player.falling = false
 		player.clear_hit_stun()
 
-	current_rocket = get_tree().get_first_node_in_group("rocket") as Node3D
+	current_rocket = get_tree().get_first_node_in_group("rocket")
 	if current_rocket and player:
-		current_rocket.global_position = player.global_position + Arena3D.ROCKET_MOUNT_OFFSET
+		current_rocket.global_position = player.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
 		current_rocket.activate()
 		player.mount_rocket(current_rocket)
 
@@ -98,7 +118,7 @@ func start_game(reset_progress: bool = true) -> void:
 
 
 func game_over():
-	state = GameState.GAME_OVER
+	_set_state(GameState.GAME_OVER)
 	ui_finalscore.text = "SCORE: " + str(score)
 	ui_gameover.visible = true
 
@@ -114,7 +134,7 @@ func on_rocket_exploded():
 	if player:
 		player.dismount_rocket()
 		player.falling = true
-		state = GameState.FALLING
+		_set_state(GameState.FALLING)
 		fall_height = 0.0
 
 
@@ -129,7 +149,7 @@ func handle_falling(delta: float) -> void:
 			return
 		var p2 := Vector2(player.global_position.x, player.global_position.z)
 		var r2 := Vector2(new_rocket.global_position.x, new_rocket.global_position.z)
-		if p2.distance_to(r2) < Arena3D.RESCUE_LAND_RADIUS:
+		if p2.distance_to(r2) < _Arena3D.RESCUE_LAND_RADIUS:
 			catch_rocket()
 			return
 	if fall_height > max_fall_height:
@@ -142,7 +162,7 @@ func catch_rocket():
 	pickup_ttl = 0.0
 	EventBus.sfx_requested.emit(&"pickup")
 	current_rocket = new_rocket
-	current_rocket.global_position = player.global_position + Arena3D.ROCKET_MOUNT_OFFSET
+	current_rocket.global_position = player.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
 	current_rocket.activate()
 
 	player.mount_rocket(current_rocket)
@@ -155,7 +175,7 @@ func catch_rocket():
 
 	ui_rocket_warning.visible = false
 
-	state = GameState.PLAYING
+	_set_state(GameState.PLAYING)
 
 	if lives <= 0:
 		game_over()
@@ -172,7 +192,7 @@ func lose_life():
 	ui_rocket_warning.visible = false
 
 	if lives <= 0:
-		state = GameState.GAME_OVER
+		_set_state(GameState.GAME_OVER)
 		ui_finalscore.text = "SCORE: " + str(score)
 		ui_gameover.visible = true
 	else:
@@ -199,6 +219,7 @@ func on_player_hit() -> void:
 
 
 func player_die_game_over() -> void:
+	EventBus.sfx_requested.emit(&"player_die")
 	if player:
 		player.die_visual_only()
 	game_over()
@@ -214,7 +235,7 @@ func hop_to_rocket():
 		current_rocket.queue_free()
 
 	current_rocket = new_rocket
-	current_rocket.global_position = player.global_position + Arena3D.ROCKET_MOUNT_OFFSET
+	current_rocket.global_position = player.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
 	current_rocket.activate()
 
 	player.mount_rocket(current_rocket)
@@ -227,17 +248,19 @@ func hop_to_rocket():
 
 	ui_rocket_warning.visible = false
 
-	state = GameState.PLAYING
+	_set_state(GameState.PLAYING)
 
 	if player:
-		player.modulate = Color(1.15, 1.12, 1.05, 1)
+		player._mesh
+		player.set_tint(Color(1.15, 1.12, 1.05, 1))
 		var tw := player.create_tween()
-		tw.tween_property(player, "modulate", Color.WHITE, 0.22)
+		tw.tween_property(player._mesh_mat, "albedo_color", Color.WHITE, 0.22)
 	if background_manager and background_manager.has_method("cycle_background"):
 		background_manager.cycle_background()
 
 
 func missed_rocket():
+	EventBus.sfx_requested.emit(&"miss")
 	if new_rocket:
 		new_rocket.queue_free()
 	lose_life()
@@ -261,3 +284,4 @@ func update_ui():
 
 func restart():
 	get_tree().reload_current_scene()
+	

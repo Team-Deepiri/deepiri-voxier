@@ -13,6 +13,7 @@ var fire_rate := 0.5
 var zigzag := false
 
 @onready var _mesh: MeshInstance3D = $MeshInstance3D
+var _mesh_mat: StandardMaterial3D
 var player: Node3D
 var _tint := Color.WHITE
 
@@ -22,6 +23,16 @@ func _ready() -> void:
 	add_to_group("enemy")
 	setup_enemy()
 	_apply_visual()
+	call_deferred("_setup_material")
+
+#Set up a standardMaterial3D to get the flash on hit
+func _setup_material() -> void:
+	var mat := StandardMaterial3D.new()
+	mat.flags_transparent = true
+	mat.albedo_color = Color.WHITE
+	for i in _mesh.get_surface_override_material_count():
+		_mesh.set_surface_override_material(i, mat)
+	_mesh_mat = mat
 
 
 func _apply_visual() -> void:
@@ -87,6 +98,7 @@ func _physics_process(delta: float) -> void:
 
 func take_damage(dmg: int) -> void:
 	health -= dmg
+	EventBus.sfx_requested.emit(&"hit")
 	_flash_hit()
 	if health <= 0:
 		die()
@@ -94,8 +106,8 @@ func take_damage(dmg: int) -> void:
 
 func _flash_hit() -> void:
 	var tw := create_tween()
-	_mesh.modulate = Color(2.5, 2.5, 2.5, 1.0)
-	tw.tween_property(_mesh, "modulate", Color.WHITE, 0.08)
+	_mesh_mat.albedo_color = Color(2.5, 2.5, 2.5, 1.0)
+	tw.tween_property(_mesh_mat, "albedo_color", Color.WHITE, 0.08)
 
 
 func die() -> void:
@@ -115,8 +127,9 @@ func spawn_powerup() -> void:
 	if arena == null:
 		return
 	var powerup: Area3D = load("res://scenes/powerup_3d.tscn").instantiate()
-	powerup.global_position = global_position
 	arena.add_child(powerup)
+	powerup.global_position = global_position
+
 
 
 func _on_area_entered(area: Area3D) -> void:

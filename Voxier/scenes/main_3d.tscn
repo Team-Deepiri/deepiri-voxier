@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://main3d001"]
+[gd_scene load_steps=13 format=3 uid="uid://main3d001"]
 
 [ext_resource type="Script" path="res://scripts/arcade3/main_3d.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/arcade3/background_3d.gd" id="2_bg"]
@@ -25,8 +25,8 @@ size = Vector3(50, 0.2, 50)
 
 [sub_resource type="StandardMaterial3D" id="floor_mat"]
 albedo_color = Color(0.08, 0.06, 0.14, 1)
-roughness = 0.92
 metallic = 0.05
+roughness = 0.92
 
 [node name="Main3D" type="Node3D"]
 script = ExtResource("1")
@@ -48,9 +48,8 @@ unique_name_in_owner = true
 script = ExtResource("2_bg")
 
 [node name="Floor" type="StaticBody3D" parent="Arena"]
-collision_layer = 1
-collision_mask = 0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 16)
+collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Arena/Floor"]
 shape = SubResource("floor_shape")
@@ -78,7 +77,6 @@ script = ExtResource("6_piv")
 target_path = NodePath("../Arena/Player")
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 current = true
 fov = 62.0
 script = ExtResource("5_cam")
@@ -138,68 +136,71 @@ theme_override_font_sizes/font_size = 24
 text = "RESCUE ROCKET — FLY INTO IT OR ENTER / HOP (TIMER!)"
 horizontal_alignment = 1
 
-[node name="StartPanel" type="PanelContainer" parent="UI"]
+[node name="Control" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="StartPanel" type="PanelContainer" parent="UI/Control"]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 200.0
 offset_top = 150.0
 offset_right = 600.0
 offset_bottom = 450.0
 
-[node name="VBox" type="VBoxContainer" parent="UI/StartPanel"]
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 395.0
-offset_bottom = 295.0
+[node name="VBox" type="VBoxContainer" parent="UI/Control/StartPanel"]
+layout_mode = 2
 
-[node name="Title" type="Label" parent="UI/StartPanel/VBox"]
+[node name="Title" type="Label" parent="UI/Control/StartPanel/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.42, 0.21, 1)
 theme_override_font_sizes/font_size = 28
 text = "VOXIER 3D"
 horizontal_alignment = 1
 
-[node name="StartBtn" type="Button" parent="UI/StartPanel/VBox"]
+[node name="StartBtn" type="Button" parent="UI/Control/StartPanel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "START RUN"
 
-[node name="VoxBtn" type="Button" parent="UI/StartPanel/VBox"]
+[node name="VoxBtn" type="Button" parent="UI/Control/StartPanel/VBox"]
 layout_mode = 2
+action_mode = 0
 text = "DEEPIRI VOX ANALYZER"
 
-[node name="CatBtn" type="Button" parent="UI/StartPanel/VBox"]
+[node name="CatBtn" type="Button" parent="UI/Control/StartPanel/VBox"]
 layout_mode = 2
 text = "C.A.T. PILOT (CLI)"
 
-[node name="Controls" type="Label" parent="UI/StartPanel/VBox"]
+[node name="Controls" type="Label" parent="UI/Control/StartPanel/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "ARROWS: MOVE | SPACE: FIRE
 Q/E: TURN | ENTER / HOP: SNAP ROCKET"
 horizontal_alignment = 1
 
-[node name="GameOverPanel" type="PanelContainer" parent="UI"]
+[node name="GameOverPanel" type="PanelContainer" parent="UI/Control"]
 unique_name_in_owner = true
 visible = false
+layout_mode = 0
 offset_left = 200.0
 offset_top = 150.0
 offset_right = 600.0
 offset_bottom = 450.0
 
-[node name="VBox" type="VBoxContainer" parent="UI/GameOverPanel"]
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 395.0
-offset_bottom = 295.0
+[node name="VBox" type="VBoxContainer" parent="UI/Control/GameOverPanel"]
+layout_mode = 2
 
-[node name="Title" type="Label" parent="UI/GameOverPanel/VBox"]
+[node name="Title" type="Label" parent="UI/Control/GameOverPanel/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
 theme_override_font_sizes/font_size = 28
 text = "GAME OVER"
 horizontal_alignment = 1
 
-[node name="FinalScoreLabel" type="Label" parent="UI/GameOverPanel/VBox"]
+[node name="FinalScoreLabel" type="Label" parent="UI/Control/GameOverPanel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.84, 0, 1)
@@ -207,10 +208,10 @@ theme_override_font_sizes/font_size = 22
 text = "SCORE: 0"
 horizontal_alignment = 1
 
-[node name="RetryBtn" type="Button" parent="UI/GameOverPanel/VBox"]
+[node name="RetryBtn" type="Button" parent="UI/Control/GameOverPanel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "RETRY"
 
-[connection signal="pressed" from="UI/StartPanel/VBox/StartBtn" to="." method="_on_start_pressed"]
-[connection signal="pressed" from="UI/GameOverPanel/VBox/RetryBtn" to="." method="_on_retry_pressed"]
+[connection signal="pressed" from="UI/Control/StartPanel/VBox/StartBtn" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="UI/Control/GameOverPanel/VBox/RetryBtn" to="." method="_on_retry_pressed"]

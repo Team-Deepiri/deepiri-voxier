@@ -154,6 +154,7 @@ func spawn_new() -> Node3D:
 	var land := ppos + Vector3(randf_range(-3.5, 3.5), 0.4, randf_range(0.5, 3.5))
 	new_r.configure_rescue(start, land)
 	GameManager.new_rocket = new_r
+	EventBus.sfx_requested.emit(&"rocket_spawn")
 	return new_r
 
 
