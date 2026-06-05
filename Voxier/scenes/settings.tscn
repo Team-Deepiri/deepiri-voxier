@@ -1,0 +1,70 @@
+[gd_scene load_steps=2 format=3 uid="uid://c3lcw7colud1j"]
+
+[ext_resource type="Script" path="res://scripts/settings.gd" id="1_nu3eh"]
+
+[node name="Settings" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_nu3eh")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 12
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+offset_right = 793.0
+offset_bottom = 575.0
+scale = Vector2(1.01005, 1.04644)
+color = Color(0, 0, 0, 1)
+
+[node name="SettingsPanel" type="PanelContainer" parent="CanvasLayer"]
+unique_name_in_owner = true
+offset_left = 200.0
+offset_top = 150.0
+offset_right = 600.0
+offset_bottom = 450.0
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/SettingsPanel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="CanvasLayer/SettingsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.42, 0.21, 1)
+theme_override_font_sizes/font_size = 28
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="MainVolume" type="Label" parent="CanvasLayer/SettingsPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Main Volume"
+horizontal_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="CanvasLayer/SettingsPanel/VBox"]
+layout_mode = 2
+
+[node name="MusicVolume" type="Label" parent="CanvasLayer/SettingsPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Music Volume"
+horizontal_alignment = 1
+
+[node name="HSlider2" type="HSlider" parent="CanvasLayer/SettingsPanel/VBox"]
+layout_mode = 2
+
+[node name="SFXVolume" type="Label" parent="CanvasLayer/SettingsPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "SFX Volume"
+horizontal_alignment = 1
+
+[node name="HSlider3" type="HSlider" parent="CanvasLayer/SettingsPanel/VBox"]
+layout_mode = 2
+
+[node name="ReturnBtn" type="Button" parent="CanvasLayer/SettingsPanel/VBox"]
+layout_mode = 2
+action_mode = 0
+text = "Return"

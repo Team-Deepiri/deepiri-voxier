@@ -18,7 +18,6 @@ config/icon="res://icon.svg"
 [audio]
 
 buses/default_bus_layout="res://audio/default_bus_layout.tres"
-driver/driver=""
 
 [autoload]
 

@@ -13,6 +13,7 @@ var levels = {
 var current_level = 1
 var score = 0
 var turn = 0
+var max_turns = 30
 var px = 25
 var objects = []
 var game_active = false
@@ -39,7 +40,7 @@ func _on_game_timer_timeout():
 	if not game_active: return
 	
 	turn += 1
-	if turn > 20:
+	if turn > max_turns:
 		complete_mission()
 		return
 	
@@ -54,10 +55,10 @@ func _on_game_timer_timeout():
 	for obj in objects:
 		obj["y"] += 1
 	
-	# Check collisions
+	# Check collisions 
 	var hit = false
 	for obj in objects:
-		if obj["y"] >= 13 and abs(obj["x"] - px) < 2:
+		if obj["y"] >= 13 and abs(obj["x"] - px) < 3: #make the final int larger for a bigger hitbox
 			hit = true
 			break
 	
@@ -97,6 +98,8 @@ func draw_game():
 			line += " " + lr + "🐱 "
 			line += "─".repeat(px) + "🚀"
 		else:
+			#add space for formatting ************************************
+			line += " ".repeat(10)
 			for x in range(56):
 				var hit = false
 				for obj in objects:
@@ -111,7 +114,8 @@ func draw_game():
 						break
 				if not hit:
 					line += "·"
-		line = line.left(56)+ " ║\n"
+		line += " ".repeat(15)
+		line = line.left(106)+ " ║\n"
 		output += line
 	
 	output += "╠" + "═".repeat(58) + "╣\n"
@@ -119,7 +123,7 @@ func draw_game():
 	output += "╚" + "═".repeat(58) + "╝\n"
 	
 	var progress = "█".repeat(turn * 5) + "░".repeat(100 - turn * 5)
-	output += " TURN:%d/20 | POS:%d | PROGRESS:%s\n" % [turn, px, progress.left(20)]
+	output += " TURN:%d/%d | POS:%d | PROGRESS:%s\n" % [turn,max_turns, px, progress.left(20)]
 	
 	ui_label.text = output
 

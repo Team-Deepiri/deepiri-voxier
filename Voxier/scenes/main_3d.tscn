@@ -165,14 +165,14 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "START RUN"
 
-[node name="VoxBtn" type="Button" parent="UI/Control/StartPanel/VBox"]
-layout_mode = 2
-action_mode = 0
-text = "DEEPIRI VOX ANALYZER"
-
 [node name="CatBtn" type="Button" parent="UI/Control/StartPanel/VBox"]
 layout_mode = 2
 text = "C.A.T. PILOT (CLI)"
+
+[node name="SettingsBtn" type="Button" parent="UI/Control/StartPanel/VBox"]
+layout_mode = 2
+action_mode = 0
+text = "SETTINGS"
 
 [node name="Controls" type="Label" parent="UI/Control/StartPanel/VBox"]
 layout_mode = 2
