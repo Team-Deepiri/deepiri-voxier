@@ -23,6 +23,7 @@ var _settings := preload("res://scripts/save/local_settings.gd").new()
 
 var sfx_volume_linear := 1.0
 var music_volume_linear := 1.0
+var master_volume_linear := 1.0
 var audio_enabled := true
 
 
@@ -128,6 +129,7 @@ func _prepare_loop(stream: AudioStream) -> void:
 func _load_volume_settings() -> void:
 	sfx_volume_linear = clampf(_settings.read_float(_SettingsKeys.AUDIO_SFX_VOLUME, 1.0), 0.0, 1.0)
 	music_volume_linear = clampf(_settings.read_float(_SettingsKeys.AUDIO_MUSIC_VOLUME, 0.85), 0.0, 1.0)
+	master_volume_linear = clampf(_settings.read_float(_SettingsKeys.AUDIO_MASTER_VOLUME, 1.0), 0.0, 1.0)
 	audio_enabled = _settings.read_int(_SettingsKeys.AUDIO_ENABLED, 1) != 0
 	_apply_bus_volumes()
 
@@ -135,7 +137,8 @@ func _load_volume_settings() -> void:
 func _apply_bus_volumes() -> void:
 	var master_idx := AudioServer.get_bus_index(_BusIds.MASTER)
 	if master_idx >= 0:
-		AudioServer.set_bus_volume_db(master_idx, 0.0 if audio_enabled else -80.0)
+		AudioServer.set_bus_mute(master_idx, not audio_enabled)
+		AudioServer.set_bus_volume_db(master_idx, linear_to_db(master_volume_linear))
 	var sfx_idx := AudioServer.get_bus_index(_BusIds.SFX)
 	if sfx_idx >= 0:
 		AudioServer.set_bus_volume_db(sfx_idx, linear_to_db(sfx_volume_linear))
@@ -158,6 +161,10 @@ func set_music_volume(linear: float) -> void:
 	_settings.write_float(_SettingsKeys.AUDIO_MUSIC_VOLUME, music_volume_linear)
 	_apply_bus_volumes()
 
+func set_master_volume(linear:float) -> void:
+	master_volume_linear = clampf(linear, 0.0, 1.0)
+	_settings.write_float(_SettingsKeys.AUDIO_MASTER_VOLUME, master_volume_linear)
+	_apply_bus_volumes()
 
 func set_audio_enabled(enabled: bool) -> void:
 	audio_enabled = enabled
@@ -220,7 +227,8 @@ func _crossfade_music(mood: StringName) -> void:
 		elif should_play:
 			target_db = -14.0 if key != _AudioIds.MOOD_COMBAT else -11.0
 		if should_play and not player.playing:
-			player.play()
+			if audio_enabled:
+				player.play()
 		_music_tween.tween_property(player, "volume_db", target_db, MUSIC_FADE_SEC)
 	if mood == _AudioIds.MOOD_GAME_OVER:
 		play_sfx(_AudioIds.GAME_OVER)

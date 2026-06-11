@@ -15,6 +15,7 @@ script = ExtResource("1_nu3eh")
 layer = 12
 
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+visible = false
 offset_right = 793.0
 offset_bottom = 575.0
 scale = Vector2(1.01005, 1.04644)
@@ -37,14 +38,23 @@ theme_override_font_sizes/font_size = 28
 text = "Settings"
 horizontal_alignment = 1
 
-[node name="MainVolume" type="Label" parent="CanvasLayer/SettingsPanel/VBox"]
+[node name="CheckBtn" type="CheckButton" parent="CanvasLayer/SettingsPanel/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+button_pressed = true
+text = "Audio On?"
+
+[node name="MasterVolume" type="Label" parent="CanvasLayer/SettingsPanel/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "Main Volume"
+text = "Master Volume"
 horizontal_alignment = 1
 
-[node name="HSlider" type="HSlider" parent="CanvasLayer/SettingsPanel/VBox"]
+[node name="MasterSlider" type="HSlider" parent="CanvasLayer/SettingsPanel/VBox"]
 layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
 
 [node name="MusicVolume" type="Label" parent="CanvasLayer/SettingsPanel/VBox"]
 layout_mode = 2
@@ -52,8 +62,11 @@ theme_override_font_sizes/font_size = 14
 text = "Music Volume"
 horizontal_alignment = 1
 
-[node name="HSlider2" type="HSlider" parent="CanvasLayer/SettingsPanel/VBox"]
+[node name="MusicSlider" type="HSlider" parent="CanvasLayer/SettingsPanel/VBox"]
 layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
 
 [node name="SFXVolume" type="Label" parent="CanvasLayer/SettingsPanel/VBox"]
 layout_mode = 2
@@ -61,10 +74,13 @@ theme_override_font_sizes/font_size = 14
 text = "SFX Volume"
 horizontal_alignment = 1
 
-[node name="HSlider3" type="HSlider" parent="CanvasLayer/SettingsPanel/VBox"]
+[node name="SFXSlider" type="HSlider" parent="CanvasLayer/SettingsPanel/VBox"]
 layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
 
 [node name="ReturnBtn" type="Button" parent="CanvasLayer/SettingsPanel/VBox"]
 layout_mode = 2
 action_mode = 0
-text = "Return"
+text = "BACK TO MENU"

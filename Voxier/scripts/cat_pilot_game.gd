@@ -18,6 +18,7 @@ var px = 25
 var objects = []
 var game_active = false
 var waiting_for_input = false
+var hitbox_size = 3 #make the int larger for a bigger hitbox/easier damage detection
 
 @onready var ui_label = $CanvasLayer/Control/RichTextLabel
 @onready var game_timer = $GameTimer
@@ -58,7 +59,7 @@ func _on_game_timer_timeout():
 	# Check collisions 
 	var hit = false
 	for obj in objects:
-		if obj["y"] >= 13 and abs(obj["x"] - px) < 3: #make the final int larger for a bigger hitbox
+		if obj["y"] >= 13 and abs(obj["x"] - px) < hitbox_size: 
 			hit = true
 			break
 	
@@ -95,8 +96,9 @@ func draw_game():
 		var line = "║ "
 		if y == 13:
 			var lr = "< " if px < 25 else "> "
-			line += " " + lr + "🐱 "
-			line += "─".repeat(px) + "🚀"
+			line += " " + lr + "🐱  "
+			line += " .".repeat(px) + "🚀" + " .".repeat((54-px))
+			line += " ".repeat(8)
 		else:
 			#add space for formatting ************************************
 			line += " ".repeat(10)
@@ -113,17 +115,18 @@ func draw_game():
 						hit = true
 						break
 				if not hit:
-					line += "·"
-		line += " ".repeat(15)
-		line = line.left(106)+ " ║\n"
+					line += " ·"
+			line += " ".repeat(15)
+		line = line.left(130)+ " ║\n"
 		output += line
 	
 	output += "╠" + "═".repeat(58) + "╣\n"
 	output += "║ [L] LEFT | [R] RIGHT | [Q] ABORT | [Space] CONTINUE " +" ".repeat(35) + "║\n"
 	output += "╚" + "═".repeat(58) + "╝\n"
-	
-	var progress = "█".repeat(turn * 5) + "░".repeat(100 - turn * 5)
-	output += " TURN:%d/%d | POS:%d | PROGRESS:%s\n" % [turn,max_turns, px, progress.left(20)]
+
+	var filled = mini(int((float(turn) / float(max_turns)) * 20), 20)
+	var progress = "█".repeat(filled) + "░".repeat(20 - filled)
+	output += " TURN:%d/%d | POS:%d | PROGRESS: %s\n" % [turn, max_turns, px, progress.left(20)]
 	
 	ui_label.text = output
 

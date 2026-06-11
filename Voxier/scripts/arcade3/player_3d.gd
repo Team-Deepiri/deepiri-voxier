@@ -45,6 +45,7 @@ func _setup_hero_sprite() -> void:
 	sm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	sm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	sm.albedo_texture = _hero.texture
+	sm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	_hero.material_override = sm
 	add_child(_hero)
 
@@ -100,7 +101,7 @@ func _physics_process(delta: float) -> void:
 	global_position.z = clampf(global_position.z, Arena3D.Z_MIN, Arena3D.Z_MAX)
 	
 	if velocity.x < -0.05:
-		_hero.rotation.y = 0.0
+		_hero.rotation.y = 1.0
 	elif velocity.x > 0.05:
 		_hero.rotation.y = 0.0
 		
