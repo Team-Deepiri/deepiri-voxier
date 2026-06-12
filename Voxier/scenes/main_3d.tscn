@@ -73,6 +73,7 @@ script = ExtResource("4_dir")
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.2, -12.5)
+visible = false
 script = ExtResource("6_piv")
 target_path = NodePath("../Arena/Player")
 
@@ -165,20 +166,21 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "START RUN"
 
-[node name="VoxBtn" type="Button" parent="UI/Control/StartPanel/VBox"]
-layout_mode = 2
-action_mode = 0
-text = "DEEPIRI VOX ANALYZER"
-
 [node name="CatBtn" type="Button" parent="UI/Control/StartPanel/VBox"]
 layout_mode = 2
 text = "C.A.T. PILOT (CLI)"
+
+[node name="SettingsBtn" type="Button" parent="UI/Control/StartPanel/VBox"]
+layout_mode = 2
+action_mode = 0
+text = "SETTINGS"
 
 [node name="Controls" type="Label" parent="UI/Control/StartPanel/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "ARROWS: MOVE | SPACE: FIRE
-Q/E: TURN | ENTER / HOP: SNAP ROCKET"
+Q/E: TURN | ENTER / HOP: SNAP ROCKET
+ESC: END GAME"
 horizontal_alignment = 1
 
 [node name="GameOverPanel" type="PanelContainer" parent="UI/Control"]
@@ -211,7 +213,7 @@ horizontal_alignment = 1
 [node name="RetryBtn" type="Button" parent="UI/Control/GameOverPanel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "RETRY"
+text = "RETURN TO MENU"
 
 [connection signal="pressed" from="UI/Control/StartPanel/VBox/StartBtn" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="UI/Control/GameOverPanel/VBox/RetryBtn" to="." method="_on_retry_pressed"]
