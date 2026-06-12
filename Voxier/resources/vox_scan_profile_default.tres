@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="VoxScanProfile" load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://resources/vox_scan_profile.gd" id="1"]
-
-[resource]
-script = ExtResource("1")
-name_prefixes = PackedStringArray("deepiri-", "diri-")
-skip_directory_names = PackedStringArray(".git", "node_modules", ".godot", "__pycache__")

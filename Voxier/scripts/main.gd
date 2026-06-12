@@ -9,12 +9,12 @@ const _Scenes := preload("res://scripts/ui/scene_registry.gd")
 @onready var spawner: Node = $EnemySpawner
 @onready var camera: Camera2D = $Camera2D
 
-@onready var vox_btn: Button = $UI/StartPanel/VBox/VoxBtn
+@onready var settings_btn: Button = $UI/StartPanel/VBox/SettingsBtn
 @onready var cat_btn: Button = $UI/StartPanel/VBox/CatBtn
 @onready var _speed_lines: CPUParticles2D = $SpeedFX/SpeedLines
 
 func _ready():
-	vox_btn.pressed.connect(_on_vox_pressed)
+	settings_btn.pressed.connect(_on_settings_pressed)
 	cat_btn.pressed.connect(_on_cat_pressed)
 
 
@@ -28,8 +28,8 @@ func _process(_delta: float) -> void:
 		var sp := player.velocity.length()
 		_speed_lines.amount = mini(120, 55 + int(sp * 0.12))
 
-func _on_vox_pressed():
-	get_tree().change_scene_to_file(_Scenes.VOX_UI)
+func _on_settings_pressed():
+	get_tree().change_scene_to_file(_Scenes.SETTINGS)
 
 func _on_cat_pressed():
 	get_tree().change_scene_to_file(_Scenes.CAT_PILOT)

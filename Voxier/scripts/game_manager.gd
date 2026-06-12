@@ -251,7 +251,7 @@ func hop_to_rocket():
 	_set_state(GameState.PLAYING)
 
 	if player:
-		player._mesh
+		#player._mesh
 		player.set_tint(Color(1.15, 1.12, 1.05, 1))
 		var tw := player.create_tween()
 		tw.tween_property(player._mesh_mat, "albedo_color", Color.WHITE, 0.22)
@@ -285,3 +285,10 @@ func update_ui():
 func restart():
 	get_tree().reload_current_scene()
 	
+
+#Creates a different input method to end or restart game
+func _unhandled_input(event: InputEvent) -> void:
+	if GameManager.state != GameState.PLAYING:
+		pass
+	elif event is InputEventKey and event.keycode == KEY_ESCAPE:
+		game_over()

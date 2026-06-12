@@ -45,6 +45,7 @@ func _setup_hero_sprite() -> void:
 	sm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	sm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	sm.albedo_texture = _hero.texture
+	sm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	_hero.material_override = sm
 	add_child(_hero)
 
@@ -98,10 +99,12 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	global_position.x = clampf(global_position.x, Arena3D.X_MIN, Arena3D.X_MAX)
 	global_position.z = clampf(global_position.z, Arena3D.Z_MIN, Arena3D.Z_MAX)
+	
 	if velocity.x < -0.05:
-		_hero.rotation.y = PI
+		_hero.rotation.y = 1.0
 	elif velocity.x > 0.05:
 		_hero.rotation.y = 0.0
+		
 	if Input.is_action_pressed("fire") and fire_point and _fire_cd <= 0.0:
 		fire()
 		_fire_cd = FIRE_COOLDOWN
@@ -165,3 +168,4 @@ func _on_hurt_area_entered(area: Area3D) -> void:
 func set_tint(color: Color) -> void:
 	if _mesh_mat:
 		_mesh_mat.albedo_color = color
+

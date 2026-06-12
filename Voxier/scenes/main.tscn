@@ -7,8 +7,8 @@
 [ext_resource type="Script" path="res://scripts/enemy_spawner.gd" id="5_spawner"]
 [ext_resource type="Script" path="res://scripts/direction_controller.gd" id="6_dir"]
 [ext_resource type="Script" path="res://scripts/juice/camera_juice.gd" id="7_juice"]
-[ext_resource type="PackedScene" path="res://scenes/fx/vignette_layer.tscn" id="8_vig"]
-[ext_resource type="PackedScene" path="res://scenes/fx/scanline_layer.tscn" id="9_scan"]
+[ext_resource type="PackedScene" uid="uid://vignettefx" path="res://scenes/fx/vignette_layer.tscn" id="8_vig"]
+[ext_resource type="PackedScene" uid="uid://scanlinefx" path="res://scenes/fx/scanline_layer.tscn" id="9_scan"]
 [ext_resource type="Shader" path="res://shaders/cinematic_post.gdshader" id="10_cine"]
 [ext_resource type="Script" path="res://scripts/fx/cinematic_post_driver.gd" id="11_cdrv"]
 
@@ -75,7 +75,6 @@ color = Color(1, 0.4, 0, 1)
 polygon = PackedVector2Array(-12, -8, 12, -8, 12, 8, -12, 8)
 
 [node name="Ears" type="Polygon2D" parent="Player"]
-color = Color(1, 1, 1, 1)
 polygon = PackedVector2Array(-8, -18, -4, -24, 0, -18, 0, -18, 4, -24, 8, -18)
 
 [node name="Backpack" type="Polygon2D" parent="Player"]
@@ -153,7 +152,6 @@ polygon = PackedVector2Array(-22, 14, -12, 14, -12, 24, -22, 24)
 
 [node name="Flame" type="CPUParticles2D" parent="Rocket"]
 position = Vector2(0, 28)
-emitting = true
 amount = 20
 lifetime = 0.3
 emission_shape = 2
@@ -175,7 +173,6 @@ script = ExtResource("6_dir")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(400, 300)
-current = true
 script = ExtResource("7_juice")
 
 [node name="SpeedFX" type="CanvasLayer" parent="."]
@@ -183,12 +180,11 @@ layer = 3
 
 [node name="SpeedLines" type="CPUParticles2D" parent="SpeedFX"]
 position = Vector2(400, 640)
-emitting = true
 amount = 80
 lifetime = 0.62
 randomness = 0.55
 emission_shape = 2
-emission_box_extents = Vector2(390, 14)
+emission_sphere_radius = 1.0
 direction = Vector2(0, -1)
 spread = 18.0
 gravity = Vector2(0, 0)
@@ -209,7 +205,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(1, 1, 1, 1)
 script = ExtResource("11_cdrv")
 
 [node name="VignetteLayer" parent="PostFX" instance=ExtResource("8_vig")]
@@ -285,10 +280,7 @@ offset_bottom = 450.0
 metadata/_edit_use_anchors_ = true
 
 [node name="VBox" type="VBoxContainer" parent="UI/StartPanel"]
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 395.0
-offset_bottom = 295.0
+layout_mode = 2
 
 [node name="Title" type="Label" parent="UI/StartPanel/VBox"]
 layout_mode = 2
@@ -327,10 +319,7 @@ offset_bottom = 450.0
 metadata/_edit_use_anchors_ = true
 
 [node name="VBox" type="VBoxContainer" parent="UI/GameOverPanel"]
-offset_left = 5.0
-offset_top = 5.0
-offset_right = 395.0
-offset_bottom = 295.0
+layout_mode = 2
 
 [node name="Title" type="Label" parent="UI/GameOverPanel/VBox"]
 layout_mode = 2
@@ -352,6 +341,6 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "RETRY"
 
+[connection signal="area_entered" from="Player/Area2D" to="Player" method="_on_area_entered"]
 [connection signal="pressed" from="UI/StartPanel/VBox/StartBtn" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="UI/GameOverPanel/VBox/RetryBtn" to="." method="_on_retry_pressed"]
-[connection signal="area_entered" from="Player/Area2D" to="Player" method="_on_area_entered"]
