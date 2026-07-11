@@ -1,3 +1,8 @@
+# Analyze GitHub Actions code in this repository.
+paths:
+  - '.github/workflows'
+  - '.github/actions'
+
 # Exclude generated/build/runtime artifact paths.
 paths-ignore:
   - '**/node_modules/**'
