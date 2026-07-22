@@ -28,7 +28,10 @@ func _ready():
 
 func start_mission(level_num):
 	EventBus.sfx_requested.emit(&"game_start")
-	current_level = level_num
+	if(level_num < 5):
+		current_level = level_num
+	else:
+		current_level == 5
 	score = 0
 	turn = 0
 	px = 25
