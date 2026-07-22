@@ -36,9 +36,9 @@ Uses least-privilege permissions. `security-events: write` is required so CodeQL
 ### Language setup (current)
 ```yaml
 with:
-  languages: javascript-typescript
+  languages: actions
 ```
-This workflow currently runs analysis for JavaScript and TypeScript.
+This workflow runs analysis for GitHub Actions workflows.
 
 ### Checkout step
 ```yaml
@@ -62,6 +62,15 @@ uses: github/codeql-action/analyze@v3
 Executes queries and uploads results to GitHub Security.
 
 ## Config breakdown (`.github/codeql/codeql-config.yml`)
+
+### `paths`
+CodeQL is scoped to GitHub Actions code paths:
+
+```yaml
+paths:
+  - '.github/workflows'
+  - '.github/actions'
+```
 
 ### `paths-ignore`
 Generated/build/runtime artifact paths are excluded to reduce noise and runtime:
@@ -93,14 +102,17 @@ paths-ignore:
 Keeping this updated as code and language coverage evolve is important. Here are common maintenance changes.
 
 ### Keep language scope aligned with this repository
-This workflow currently analyzes JavaScript and TypeScript only:
+This repository is primarily GDScript/GDShader/Shell, so the workflow scans GitHub Actions:
 
 ```yaml
 with:
-  languages: javascript-typescript
+  languages: actions
 ```
 
-Only change this value when this repository adds production code in another supported language.
+If the repository later adds production code in a CodeQL-supported language (for example, JavaScript/TypeScript or Python), add that language intentionally.
+
+### Known failure mode this setup avoids
+If `languages` is set to `javascript-typescript` without JS/TS source files, CodeQL fails at database finalize with a "no source code seen" error (exit code 32). Scanning `actions` avoids this mismatch and keeps PR checks meaningful.
 
 ### Exclude another generated folder
 Add a glob to `paths-ignore`, for example:
