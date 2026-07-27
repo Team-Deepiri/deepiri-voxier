@@ -33,9 +33,9 @@ extract_zip() {
 link_godot_binary() {
   case "$(uname -s)" in
     MINGW*|MSYS*|CYGWIN*)
-      if compgen -G "$INSTALL_DIR/${GODOT_TAG}_win64_console.exe" > /dev/null; then
-        mv "$INSTALL_DIR/${GODOT_TAG}_win64_console.exe" "$INSTALL_DIR/godot.exe"
-      elif compgen -G "$INSTALL_DIR/${GODOT_TAG}_win64.exe" > /dev/null; then
+      # Use the main editor exe. The *_win64_console.exe stub only works when its
+      # filename still contains "_console.exe"; renaming it to godot.exe breaks it.
+      if compgen -G "$INSTALL_DIR/${GODOT_TAG}_win64.exe" > /dev/null; then
         mv "$INSTALL_DIR/${GODOT_TAG}_win64.exe" "$INSTALL_DIR/godot.exe"
       else
         echo "Windows Godot executable not found after extract" >&2
