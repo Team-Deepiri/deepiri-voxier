@@ -104,10 +104,11 @@ TEMPLATE_ROOT="${HOME}/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERS
 if [[ "$(uname -s)" == "Darwin" ]]; then
   TEMPLATE_ROOT="${HOME}/Library/Application Support/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
 elif [[ "$(uname -s)" =~ MINGW|MSYS|CYGWIN ]]; then
-  if [[ -n "${LOCALAPPDATA:-}" ]] && command -v cygpath >/dev/null 2>&1; then
-    TEMPLATE_ROOT="$(cygpath -u "$LOCALAPPDATA")/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
+  # Godot reads export templates from %APPDATA% (Roaming), not LocalAppData.
+  if [[ -n "${APPDATA:-}" ]] && command -v cygpath >/dev/null 2>&1; then
+    TEMPLATE_ROOT="$(cygpath -u "$APPDATA")/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
   else
-    TEMPLATE_ROOT="${HOME}/AppData/Local/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
+    TEMPLATE_ROOT="${HOME}/AppData/Roaming/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
   fi
 fi
 
