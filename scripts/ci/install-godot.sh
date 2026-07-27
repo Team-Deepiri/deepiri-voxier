@@ -5,6 +5,9 @@ set -euo pipefail
 GODOT_VERSION="${GODOT_VERSION:-4.2.2}"
 GODOT_RELEASE="${GODOT_VERSION}-stable"
 GODOT_TAG="Godot_v${GODOT_RELEASE}"
+# Godot locates export templates by its dotted version string (e.g. 4.2.2.stable),
+# not the hyphenated release tag used for downloads.
+GODOT_TEMPLATE_VERSION="${GODOT_VERSION}.stable"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/godot-ci}"
 mkdir -p "$INSTALL_DIR"
 
@@ -57,11 +60,11 @@ else
   fi
 fi
 
-TEMPLATE_ROOT="${HOME}/.local/share/godot/export_templates/${GODOT_RELEASE}"
+TEMPLATE_ROOT="${HOME}/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERSION}"
 if [[ "$(uname -s)" == "Darwin" ]]; then
-  TEMPLATE_ROOT="${HOME}/Library/Application Support/Godot/export_templates/${GODOT_RELEASE}"
+  TEMPLATE_ROOT="${HOME}/Library/Application Support/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
 elif [[ "$(uname -s)" =~ MINGW|MSYS|CYGWIN ]]; then
-  TEMPLATE_ROOT="${LOCALAPPDATA:-$HOME/AppData/Local}/Godot/export_templates/${GODOT_RELEASE}"
+  TEMPLATE_ROOT="${LOCALAPPDATA:-$HOME/AppData/Local}/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
 fi
 
 if [[ ! -d "$TEMPLATE_ROOT" ]]; then
