@@ -33,9 +33,9 @@ extract_zip() {
 link_godot_binary() {
   case "$(uname -s)" in
     MINGW*|MSYS*|CYGWIN*)
-      if compgen -G "$INSTALL_DIR/${GODOT_TAG}_win64_console.exe" > /dev/null; then
-        mv "$INSTALL_DIR/${GODOT_TAG}_win64_console.exe" "$INSTALL_DIR/godot.exe"
-      elif compgen -G "$INSTALL_DIR/${GODOT_TAG}_win64.exe" > /dev/null; then
+      # Use the main editor exe. The *_win64_console.exe stub only works when its
+      # filename still contains "_console.exe"; renaming it to godot.exe breaks it.
+      if compgen -G "$INSTALL_DIR/${GODOT_TAG}_win64.exe" > /dev/null; then
         mv "$INSTALL_DIR/${GODOT_TAG}_win64.exe" "$INSTALL_DIR/godot.exe"
       else
         echo "Windows Godot executable not found after extract" >&2
@@ -104,10 +104,11 @@ TEMPLATE_ROOT="${HOME}/.local/share/godot/export_templates/${GODOT_TEMPLATE_VERS
 if [[ "$(uname -s)" == "Darwin" ]]; then
   TEMPLATE_ROOT="${HOME}/Library/Application Support/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
 elif [[ "$(uname -s)" =~ MINGW|MSYS|CYGWIN ]]; then
-  if [[ -n "${LOCALAPPDATA:-}" ]] && command -v cygpath >/dev/null 2>&1; then
-    TEMPLATE_ROOT="$(cygpath -u "$LOCALAPPDATA")/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
+  # Godot reads export templates from %APPDATA% (Roaming), not LocalAppData.
+  if [[ -n "${APPDATA:-}" ]] && command -v cygpath >/dev/null 2>&1; then
+    TEMPLATE_ROOT="$(cygpath -u "$APPDATA")/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
   else
-    TEMPLATE_ROOT="${HOME}/AppData/Local/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
+    TEMPLATE_ROOT="${HOME}/AppData/Roaming/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
   fi
 fi
 
