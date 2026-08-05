@@ -27,37 +27,36 @@ script = ExtResource("1_main")
 [node name="WorldContainer" type="Node2D" parent="."]
 position = Vector2(400, 300)
 
-[node name="BackgroundManager" type="Node2D" parent="."]
-position = Vector2(400, 300)
+[node name="BackgroundManager" type="Node2D" parent="WorldContainer"]
 script = ExtResource("2_bg")
 
-[node name="BackgroundRect" type="ColorRect" parent="BackgroundManager"]
+[node name="BackgroundRect" type="ColorRect" parent="WorldContainer/BackgroundManager"]
 offset_left = -400.0
 offset_top = -300.0
 offset_right = 400.0
 offset_bottom = 300.0
 color = Color(0.04, 0.02, 0.11, 1)
 
-[node name="MidRect" type="ColorRect" parent="BackgroundManager"]
+[node name="MidRect" type="ColorRect" parent="WorldContainer/BackgroundManager"]
 offset_left = -380.0
 offset_top = -280.0
 offset_right = 380.0
 offset_bottom = 280.0
 color = Color(0.1, 0.05, 0.22, 1)
 
-[node name="ForegroundRect" type="ColorRect" parent="BackgroundManager"]
+[node name="ForegroundRect" type="ColorRect" parent="WorldContainer/BackgroundManager"]
 offset_left = -350.0
 offset_top = -250.0
 offset_right = 350.0
 offset_bottom = 250.0
 color = Color(0, 0, 0, 0.3)
 
-[node name="StarsContainer" type="Node2D" parent="BackgroundManager"]
+[node name="StarsContainer" type="Node2D" parent="WorldContainer/BackgroundManager"]
 
-[node name="BuildingsContainer" type="Node2D" parent="BackgroundManager"]
+[node name="BuildingsContainer" type="Node2D" parent="WorldContainer/BackgroundManager"]
 visible = false
 
-[node name="TreesContainer" type="Node2D" parent="BackgroundManager"]
+[node name="TreesContainer" type="Node2D" parent="WorldContainer/BackgroundManager"]
 visible = false
 
 [node name="Player" type="CharacterBody2D" parent="."]
@@ -294,13 +293,17 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "START RUN"
 
-[node name="VoxBtn" type="Button" parent="UI/StartPanel/VBox"]
+[node name="FoxBtn" type="Button" parent="UI/StartPanel/VBox"]
 layout_mode = 2
-text = "DEEPIRI VOX ANALYZER"
+text = "3D VOXIER"
 
 [node name="CatBtn" type="Button" parent="UI/StartPanel/VBox"]
 layout_mode = 2
 text = "C.A.T. PILOT (CLI)"
+
+[node name="SettingsBtn" type="Button" parent="UI/StartPanel/VBox"]
+layout_mode = 2
+text = "SETTINGS"
 
 [node name="Controls" type="Label" parent="UI/StartPanel/VBox"]
 layout_mode = 2

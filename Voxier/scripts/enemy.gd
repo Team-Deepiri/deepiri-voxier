@@ -55,7 +55,7 @@ func setup_enemy() -> void:
 func _physics_process(delta: float) -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
-	position.y -= move_speed * delta
+	position.y += move_speed * delta
 	if zigzag:
 		position.x += sin(Time.get_ticks_msec() / 1000.0 * 3.1) * 52.0 * delta
 	if player and is_instance_valid(player):
@@ -68,7 +68,7 @@ func _physics_process(delta: float) -> void:
 			_:
 				hx = 0.24
 		position.x += (player.global_position.x - global_position.x) * hx * delta
-	if position.y < -80:
+	if position.y > 700:
 		queue_free()
 
 func take_damage(dmg: int) -> void:

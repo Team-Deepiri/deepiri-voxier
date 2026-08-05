@@ -59,9 +59,9 @@ func _physics_process(delta: float) -> void:
 	elif Input.is_action_pressed("move_right"):
 		input.x = 1
 	if Input.is_action_pressed("move_up"):
-		input.y = 1
-	elif Input.is_action_pressed("move_down"):
 		input.y = -1
+	elif Input.is_action_pressed("move_down"):
+		input.y = 1
 	move_vel = input.normalized() * MOVE_SPEED
 	velocity = move_vel
 	move_and_slide()
