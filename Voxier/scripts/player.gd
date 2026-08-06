@@ -2,8 +2,12 @@ extends CharacterBody2D
 
 const MOVE_SPEED := 300.0
 const FIRE_COOLDOWN := 0.11
+const RAPID_FIRE_COOLDOWN := 0.05
+const POWERUP_DURATION := 6.0
 const ImpactParticles := preload("res://scripts/juice/impact_particles.gd")
 const _RimShader := preload("res://shaders/fox_sprite_rim.gdshader")
+
+enum PowerupType { RAPID, SHIELD, MULTI }
 
 var move_vel := Vector2.ZERO
 var current_rocket: Node2D
@@ -12,6 +16,9 @@ var falling := false
 var _fire_cd := 0.0
 var _invuln := 0.0
 var _hero: Sprite2D
+var _active_powerup := -1
+var _powerup_timer := 0.0
+var _shield: Polygon2D
 
 @onready var body: Polygon2D = $Body
 @onready var head: Polygon2D = $Head
@@ -20,9 +27,10 @@ var _hero: Sprite2D
 func _ready() -> void:
 	add_to_group("player")
 	_setup_hero_sprite()
+	_setup_shield_visual()
 
 func is_invulnerable() -> bool:
-	return _invuln > 0.0
+	return _invuln > 0.0 or _active_powerup == PowerupType.SHIELD
 
 func apply_hit_stun() -> void:
 	_invuln = 2.1
@@ -32,15 +40,48 @@ func apply_hit_stun() -> void:
 		tw.tween_property(self, "modulate:a", 1.0, 0.07)
 	tw.tween_callback(func(): modulate = Color(1, 1, 1, 1))
 
+func apply_powerup(type: int) -> void:
+	_active_powerup = type
+	_powerup_timer = POWERUP_DURATION
+	if _shield:
+		_shield.visible = type == PowerupType.SHIELD
+
+func _end_powerup() -> void:
+	_active_powerup = -1
+	_powerup_timer = 0.0
+	if _shield:
+		_shield.visible = false
+
+func _setup_shield_visual() -> void:
+	_shield = Polygon2D.new()
+	_shield.name = "Shield"
+	_shield.color = Color(0.3, 0.9, 1.0, 0.2)
+	_shield.polygon = _make_circle_polygon(38.0, 28)
+	_shield.show_behind_parent = true
+	_shield.visible = false
+	add_child(_shield)
+
+static func _make_circle_polygon(radius: float, segments: int) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for i in range(segments):
+		var a := TAU * float(i) / float(segments)
+		pts.append(Vector2(cos(a), sin(a)) * radius)
+	return pts
+
 func clear_hit_stun() -> void:
 	_invuln = 0.0
 	modulate = Color(1, 1, 1, 1)
+	_end_powerup()
 
 func _physics_process(delta: float) -> void:
 	if _invuln > 0.0:
 		_invuln = maxf(0.0, _invuln - delta)
 	if _fire_cd > 0.0:
 		_fire_cd = maxf(0.0, _fire_cd - delta)
+	if _active_powerup != -1:
+		_powerup_timer -= delta
+		if _powerup_timer <= 0.0:
+			_end_powerup()
 	if not is_alive:
 		velocity = Vector2.ZERO
 		move_and_slide()
@@ -67,18 +108,20 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	position.x = clampf(position.x, 40, 760)
 	position.y = clampf(position.y, 200, 560)
-	if velocity.x < 0:
-		scale.x = -1
-	elif velocity.x > 0:
-		scale.x = 1
 	if Input.is_action_pressed("fire") and fire_point and _fire_cd <= 0.0:
 		fire()
-		_fire_cd = FIRE_COOLDOWN
+		_fire_cd = FIRE_COOLDOWN if _active_powerup != PowerupType.RAPID else RAPID_FIRE_COOLDOWN
 
 func fire() -> void:
 	GameAudio.play_fire()
+	_spawn_bullet(fire_point.global_position)
+	if _active_powerup == PowerupType.MULTI:
+		_spawn_bullet(fire_point.global_position + Vector2(-12, 8))
+		_spawn_bullet(fire_point.global_position + Vector2(12, 8))
+
+func _spawn_bullet(pos: Vector2) -> void:
 	var bullet: Area2D = load("res://scenes/bullet.tscn").instantiate()
-	bullet.position = fire_point.global_position
+	bullet.position = pos
 	bullet.is_player_bullet = true
 	get_tree().current_scene.add_child(bullet)
 
@@ -97,9 +140,10 @@ func die_visual_only() -> void:
 	visible = false
 	if _hero:
 		_hero.visible = false
+	_end_powerup()
 	var scene := get_tree().current_scene
 	if scene:
-		ImpactParticles.burst(scene, global_position, Color(1, 0.35, 0.2), 40)
+		ImpactParticles.burst(scene, global_position, Color(0.55, 0.32, 0.78), 40)
 
 func revive() -> void:
 	is_alive = true
@@ -108,6 +152,7 @@ func revive() -> void:
 	position = Vector2(400, 480)
 	modulate = Color.WHITE
 	_invuln = 0.0
+	_end_powerup()
 	if _hero:
 		_hero.visible = true
 

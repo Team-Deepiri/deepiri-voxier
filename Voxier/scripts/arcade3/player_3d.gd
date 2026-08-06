@@ -2,7 +2,11 @@ extends CharacterBody3D
 
 const MOVE_SPEED := 7.5
 const FIRE_COOLDOWN := 0.11
+const RAPID_FIRE_COOLDOWN := 0.05
+const POWERUP_DURATION := 6.0
 const ImpactParticles3D := preload("res://scripts/juice/impact_particles_3d.gd")
+
+enum PowerupType { RAPID, SHIELD, MULTI }
 
 var move_vel := Vector3.ZERO
 var current_rocket: Node3D
@@ -11,6 +15,9 @@ var falling := false
 var _fire_cd := 0.0
 var _invuln := 0.0
 var _hero: Sprite3D
+var _active_powerup := -1
+var _powerup_timer := 0.0
+var _shield: MeshInstance3D
 @onready var _mesh: MeshInstance3D = $MeshInstance3D
 var _mesh_mat: StandardMaterial3D
 #mesh mat to add color/flashes without changing texture
@@ -21,6 +28,7 @@ var _mesh_mat: StandardMaterial3D
 func _ready() -> void:
 	add_to_group("player")
 	_setup_hero_sprite()
+	_setup_shield_visual()
 	call_deferred("_setup_material")
 
 #set up the mesh_mat for the damage indicator
@@ -51,8 +59,36 @@ func _setup_hero_sprite() -> void:
 
 
 func is_invulnerable() -> bool:
-	return _invuln > 0.0
+	return _invuln > 0.0 or _active_powerup == PowerupType.SHIELD
 
+func apply_powerup(type: int) -> void:
+	_active_powerup = type
+	_powerup_timer = POWERUP_DURATION
+	if _shield:
+		_shield.visible = type == PowerupType.SHIELD
+
+func _end_powerup() -> void:
+	_active_powerup = -1
+	_powerup_timer = 0.0
+	if _shield:
+		_shield.visible = false
+
+func _setup_shield_visual() -> void:
+	_shield = MeshInstance3D.new()
+	_shield.name = "Shield"
+	var sm := SphereMesh.new()
+	sm.radius = 0.72
+	sm.height = 1.44
+	_shield.mesh = sm
+	var mat := StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.albedo_color = Color(0.3, 0.9, 1.0, 0.25)
+	_shield.material_override = mat
+	_shield.position = Vector3(0, 0.72, 0)
+	_shield.visible = false
+	add_child(_shield)
 
 func apply_hit_stun() -> void:
 	_invuln = 2.1
@@ -64,6 +100,7 @@ func apply_hit_stun() -> void:
 
 func clear_hit_stun() -> void:
 	_invuln = 0.0
+	_end_powerup()
 	if _mesh_mat:
 		_mesh_mat.albedo_color = Color(1, 1, 1, 1)
 
@@ -73,6 +110,10 @@ func _physics_process(delta: float) -> void:
 		_invuln = maxf(0.0, _invuln - delta)
 	if _fire_cd > 0.0:
 		_fire_cd = maxf(0.0, _fire_cd - delta)
+	if _active_powerup != -1:
+		_powerup_timer -= delta
+		if _powerup_timer <= 0.0:
+			_end_powerup()
 	if not is_alive:
 		velocity = Vector3.ZERO
 		move_and_slide()
@@ -101,23 +142,29 @@ func _physics_process(delta: float) -> void:
 	global_position.z = clampf(global_position.z, Arena3D.Z_MIN, Arena3D.Z_MAX)
 	
 	if velocity.x < -0.05:
-		_hero.rotation.y = 1.0
+		_hero.scale.x = -1
 	elif velocity.x > 0.05:
-		_hero.rotation.y = 0.0
+		_hero.scale.x = 1
 		
 	if Input.is_action_pressed("fire") and fire_point and _fire_cd <= 0.0:
 		fire()
-		_fire_cd = FIRE_COOLDOWN
+		_fire_cd = FIRE_COOLDOWN if _active_powerup != PowerupType.RAPID else RAPID_FIRE_COOLDOWN
 
 
 func fire() -> void:
 	GameAudio.play_fire()
-	var bullet: Area3D = load("res://scenes/bullet_3d.tscn").instantiate()
 	var arena := get_tree().current_scene.get_node_or_null("%Arena") as Node3D
 	if arena == null:
 		return
+	_spawn_bullet(fire_point.global_position, arena)
+	if _active_powerup == PowerupType.MULTI:
+		_spawn_bullet(fire_point.global_position + Vector3(-0.35, 0, 0.15), arena)
+		_spawn_bullet(fire_point.global_position + Vector3(0.35, 0, 0.15), arena)
+
+func _spawn_bullet(pos: Vector3, arena: Node3D) -> void:
+	var bullet: Area3D = load("res://scenes/bullet_3d.tscn").instantiate()
 	arena.add_child(bullet)
-	bullet.global_position = fire_point.global_position
+	bullet.global_position = pos
 	bullet.is_player_bullet = true
 
 
@@ -138,9 +185,10 @@ func die_visual_only() -> void:
 	visible = false
 	if _hero:
 		_hero.visible = false
+	_end_powerup()
 	var arena := get_tree().current_scene.get_node_or_null("%Arena") as Node3D
 	if arena:
-		ImpactParticles3D.burst(arena, global_position + Vector3(0, 0.5, 0), Color(1, 0.35, 0.2), 40)
+		ImpactParticles3D.burst(arena, global_position + Vector3(0, 0.5, 0), Color(0.55, 0.32, 0.78), 40)
 
 
 func revive() -> void:
@@ -153,6 +201,7 @@ func revive() -> void:
 	if _mesh_mat:
 		_mesh_mat.albedo_color = Color.WHITE
 	_invuln = 0.0
+	_end_powerup()
 
 
 func _on_hurt_area_entered(area: Area3D) -> void:

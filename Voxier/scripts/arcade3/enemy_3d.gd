@@ -117,7 +117,7 @@ func die() -> void:
 	EventBus.camera_shake_requested.emit(0.14)
 	EventBus.sfx_requested.emit(&"enemy_die")
 	GameManager.add_score(score_value)
-	if enemy_type == EnemyType.MOTHER and randf() < 0.32:
+	if randf() < 0.25:
 		spawn_powerup()
 	queue_free()
 
@@ -126,9 +126,13 @@ func spawn_powerup() -> void:
 	var arena := get_tree().current_scene.get_node_or_null("%Arena") as Node3D
 	if arena == null:
 		return
+	_add_powerup.call_deferred(arena, global_position)
+
+func _add_powerup(arena: Node3D, drop_position: Vector3) -> void:
 	var powerup: Area3D = load("res://scenes/powerup_3d.tscn").instantiate()
+	powerup.powerup_type = randi() % 3
 	arena.add_child(powerup)
-	powerup.global_position = global_position
+	powerup.global_position = drop_position
 
 
 
