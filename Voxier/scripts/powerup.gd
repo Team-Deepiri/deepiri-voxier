@@ -1,6 +1,6 @@
 extends Area2D
 
-enum PowerupType { RAPID, SHIELD, MULTI }
+const PowerupType := preload("res://scripts/game_enums.gd").PowerupType
 
 @export var powerup_type := PowerupType.RAPID
 

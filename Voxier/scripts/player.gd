@@ -12,7 +12,7 @@ const SQUASH_MAX := 0.07
 const ImpactParticles := preload("res://scripts/juice/impact_particles.gd")
 const _RimShader := preload("res://shaders/fox_sprite_rim.gdshader")
 
-enum PowerupType { RAPID, SHIELD, MULTI }
+const PowerupType := preload("res://scripts/game_enums.gd").PowerupType
 
 var move_vel := Vector2.ZERO
 var current_rocket: Node2D
