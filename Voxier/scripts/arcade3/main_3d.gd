@@ -5,18 +5,22 @@ const _UiAudio := preload("res://scripts/audio/ui_audio.gd")
 
 @onready var settings_btn: Button = $UI/Control/StartPanel/VBox/SettingsBtn
 @onready var cat_btn: Button = $UI/Control/StartPanel/VBox/CatBtn
+@onready var flat_btn: Button = $UI/Control/StartPanel/VBox/FlatBtn
 @onready var _ui_root: CanvasLayer = $UI
 
 
 func _ready() -> void:
 	_UiAudio.wire_buttons_in(_ui_root)
 	settings_btn.pressed.connect(_on_settings_pressed)
+	flat_btn.pressed.connect(_on_flat_pressed)
 	cat_btn.pressed.connect(_on_cat_pressed)
 
 
 func _on_settings_pressed():
 	get_tree().change_scene_to_file(_Scenes.SETTINGS)
 
+func _on_flat_pressed():
+	get_tree().change_scene_to_file(_Scenes.FLAT_PILOT)
 
 func _on_cat_pressed():
 	get_tree().change_scene_to_file(_Scenes.CAT_PILOT)
