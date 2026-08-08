@@ -110,10 +110,17 @@ func _process(delta: float) -> void:
 		return
 	GameManager.rocket_timer -= delta
 	current_timer = GameManager.rocket_timer
-	position.z = start_z + sin(Time.get_ticks_msec() / 1000.0 * 3.2) * 0.12
-	rotation.y = lerp_angle(rotation.y, 0.0, 4.0 * delta)
+	var env := Outer.sample()
+	var turb := env.turbulence
+	position.z = start_z + sin(Time.get_ticks_msec() / 1000.0 * (3.2 + turb * 2.0)) * (0.12 + turb * 0.18)
+	position.x = clampf(position.x + sin((Time.get_ticks_msec() / 1000.0) * 1.4) * turb * 0.05, -0.8, 0.8)
+	rotation.y = lerp_angle(rotation.y, 0.0 + sin(Time.get_ticks_msec() / 1000.0 * 2.0) * turb * 0.08, 4.0 * delta)
 	if flame:
 		flame.emitting = true
+		if not flame.has_meta("ref_color"):
+			flame.set_meta("ref_color", flame.color)
+		var ref: Color = flame.get_meta("ref_color")
+		flame.color = ref.lerp(env.flame_color, 0.4)
 	if current_timer <= 0:
 		explode()
 
