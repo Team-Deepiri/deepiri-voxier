@@ -80,6 +80,7 @@ func build_universe() -> UniverseDef:
 	starter.thrust_mod = 1.0
 	starter.drag_mod = 1.0
 	starter.turbulence = 0.0
+	starter.menace = 1.0
 	starter.speed_mult = 1.0
 	starter.flame_color = Color(1.0, 0.62, 0.2)
 	starter.particle_color = Color(1.0, 0.62, 0.2)
@@ -101,6 +102,7 @@ func build_universe() -> UniverseDef:
 	stratus.thrust_mod = 1.05
 	stratus.drag_mod = 0.92
 	stratus.turbulence = 0.30
+	stratus.menace = 1.15
 	stratus.speed_mult = 1.06
 	stratus.flame_color = Color(1.0, 0.45, 0.42)
 	stratus.particle_color = Color(1.0, 0.45, 0.42)
@@ -123,6 +125,7 @@ func build_universe() -> UniverseDef:
 	ceramic.thrust_mod = 0.9
 	ceramic.drag_mod = 1.2
 	ceramic.turbulence = 0.55
+	ceramic.menace = 1.4
 	ceramic.speed_mult = 1.12
 	ceramic.flame_color = Color(1.0, 0.9, 0.5)
 	ceramic.particle_color = Color(1.0, 0.9, 0.5)
@@ -145,6 +148,7 @@ func build_universe() -> UniverseDef:
 	deep.thrust_mod = 1.35
 	deep.drag_mod = 0.8
 	deep.turbulence = 0.9
+	deep.menace = 1.7
 	deep.speed_mult = 1.3
 	deep.flame_color = Color(0.55, 0.42, 1.0)
 	deep.particle_color = Color(0.55, 0.42, 1.0)
@@ -167,6 +171,7 @@ func build_universe() -> UniverseDef:
 	final_dist.thrust_mod = 0.8
 	final_dist.drag_mod = 1.4
 	final_dist.turbulence = 1.4
+	final_dist.menace = 2.2
 	final_dist.speed_mult = 1.45
 	final_dist.flame_color = Color(1.0, 0.25, 0.2)
 	final_dist.particle_color = Color(1.0, 0.25, 0.2)

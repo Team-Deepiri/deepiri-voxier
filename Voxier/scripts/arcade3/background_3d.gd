@@ -28,18 +28,12 @@ func _ready() -> void:
 	Outer.district_changed.connect(_on_district_changed)
 
 
-const THEME_TO_BIOME := {
-	&"courier": 0,
-	&"stratus": 1,
-	&"ceramic": 2,
-	&"deep": 3,
-	&"final": 3,
-}
-
-
 func _on_district_changed(from: StringName, to: StringName) -> void:
-	var biome := THEME_TO_BIOME.get(to, 0) as int
-	set_background(biome)
+	var env := Outer.sample()
+	apply_profile(_Catalog.profile_for_theme(to), true)
+	if _world_env and _world_env.environment:
+		var e := _world_env.environment
+		e.ambient_light_energy = clampf(env.ambient, 0.2, 2.5)
 	EventBus.camera_shake_requested.emit(0.1)
 	EventBus.sfx_requested.emit(&"rotate")
 
