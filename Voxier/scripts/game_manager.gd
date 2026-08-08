@@ -111,6 +111,7 @@ func start_game(reset_progress: bool = true) -> void:
 	# so it stays correct even if scene names/registry entries drift.
 
 	_set_state(GameState.PLAYING)
+	Outer.reset_run()
 	EventBus.sfx_requested.emit(&"game_start")
 	if reset_progress:
 		score = tune.starting_score

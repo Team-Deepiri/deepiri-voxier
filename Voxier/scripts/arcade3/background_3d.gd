@@ -25,6 +25,23 @@ func _ready() -> void:
 	_build_parallax_band()
 	_build_stars()
 	apply_profile(_Catalog.profile_at(0), false)
+	Outer.district_changed.connect(_on_district_changed)
+
+
+const THEME_TO_BIOME := {
+	&"courier": 0,
+	&"stratus": 1,
+	&"ceramic": 2,
+	&"deep": 3,
+	&"final": 3,
+}
+
+
+func _on_district_changed(from: StringName, to: StringName) -> void:
+	var biome := THEME_TO_BIOME.get(to, 0) as int
+	set_background(biome)
+	EventBus.camera_shake_requested.emit(0.1)
+	EventBus.sfx_requested.emit(&"rotate")
 
 
 func _find_floor_mesh() -> MeshInstance3D:

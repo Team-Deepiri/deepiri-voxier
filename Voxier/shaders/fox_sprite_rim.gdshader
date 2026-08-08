@@ -16,7 +16,7 @@ void fragment() {
 		float a_lf = texture(TEXTURE, UV + vec2(-e.x, 0.0)).a;
 		float a_rt = texture(TEXTURE, UV + vec2(e.x, 0.0)).a;
 		float edge = clamp((a_up + a_dn + a_lf + a_rt) * 0.25 - t.a + 0.35, 0.0, 1.0);
-		vec3 rim_col = vec3(1.0, 0.82, 0.55) * edge * rim;
+		vec3 rim_col = vec3(1.0, 0.45, 0.12) * edge * rim;
 		float shade = 0.82 + 0.22 * clamp(dot(normalize(vec3(UV - 0.5, 0.35)), normalize(light_dir)), 0.0, 1.0);
 		COLOR = vec4(t.rgb * shade + rim_col, t.a);
 	}
