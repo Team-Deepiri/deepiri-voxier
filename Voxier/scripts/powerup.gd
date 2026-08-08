@@ -26,6 +26,9 @@ func _process(delta):
 func collect() -> void:
 	EventBus.sfx_requested.emit(&"pickup")
 	GameManager.add_score(50)
+	var p := get_tree().get_first_node_in_group("player")
+	if p and p.has_method("apply_powerup"):
+		p.apply_powerup(powerup_type)
 	queue_free()
 
 func _on_area_entered(area: Area2D) -> void:

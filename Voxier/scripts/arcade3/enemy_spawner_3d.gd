@@ -10,6 +10,14 @@ var active_count := 0
 var is_spawning := false
 
 
+func current_menace() -> float:
+	return Outer.sample().menace
+
+
+func active_limit() -> int:
+	return MAX_ENEMIES + int(round((current_menace() - 1.0) * 6.0))
+
+
 func _ready() -> void:
 	add_to_group("enemy_spawner")
 
@@ -20,7 +28,8 @@ func _process(delta: float) -> void:
 	spawn_timer -= delta
 	if spawn_timer <= 0:
 		spawn_enemy()
-		spawn_timer = max(MIN_INTERVAL, SPAWN_INTERVAL - difficulty * 0.035)
+		var menace := current_menace()
+		spawn_timer = max(MIN_INTERVAL, (SPAWN_INTERVAL - difficulty * 0.035) / menace)
 		difficulty += 0.04 * delta
 
 
@@ -39,7 +48,7 @@ func get_active_enemy_count() -> int:
 
 
 func spawn_enemy() -> void:
-	if active_count >= MAX_ENEMIES:
+	if active_count >= active_limit():
 		return
 	var scene := get_tree().current_scene
 	if scene == null:
@@ -66,21 +75,37 @@ func _on_enemy_left_tree() -> void:
 
 
 func get_weighted_type() -> int:
-	var r := randf()
+	var pool := Outer.current_pool()
+	if not pool.is_empty():
+		var key := ""
+		var total := 0.0
+		for e in pool:
+			total += e.weight
+		var r := randf() * total
+		var acc := 0.0
+		for e in pool:
+			acc += e.weight
+			if r < acc:
+				key = str(e.key)
+				break
+		var idx := key.trim_prefix("kind_").to_int()
+		if idx >= 0 and idx <= 3:
+			return idx
+	var fallback := randf()
 	if difficulty < 3.5:
-		if r < 0.68:
+		if fallback < 0.68:
 			return 0
-		if r < 0.93:
+		if fallback < 0.93:
 			return 1
 		return 2
 	elif difficulty < 7.0:
-		if r < 0.52:
+		if fallback < 0.52:
 			return 0
-		if r < 0.82:
+		if fallback < 0.82:
 			return 1
 		return 2
-	if r < 0.38:
+	if fallback < 0.38:
 		return 0
-	if r < 0.72:
+	if fallback < 0.72:
 		return 1
 	return 2

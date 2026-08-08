@@ -55,7 +55,7 @@ func setup_enemy() -> void:
 func _physics_process(delta: float) -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
-	position.y -= move_speed * delta
+	position.y += move_speed * delta
 	if zigzag:
 		position.x += sin(Time.get_ticks_msec() / 1000.0 * 3.1) * 52.0 * delta
 	if player and is_instance_valid(player):
@@ -68,7 +68,7 @@ func _physics_process(delta: float) -> void:
 			_:
 				hx = 0.24
 		position.x += (player.global_position.x - global_position.x) * hx * delta
-	if position.y < -80:
+	if position.y > 700:
 		queue_free()
 
 func take_damage(dmg: int) -> void:
@@ -90,14 +90,21 @@ func die() -> void:
 	EventBus.camera_shake_requested.emit(0.14)
 	EventBus.sfx_requested.emit(&"enemy_die")
 	GameManager.add_score(score_value)
-	if enemy_type == EnemyType.MOTHER and randf() < 0.32:
+	if  randf() < 0.25:
 		spawn_powerup()
 	queue_free()
 
 func spawn_powerup() -> void:
+	var scene := get_tree().current_scene
+	if scene == null:
+		return
+	_add_powerup.call_deferred(scene, global_position)
+
+func _add_powerup(scene: Node, drop_position: Vector2) -> void:
 	var powerup: Area2D = load("res://scenes/powerup.tscn").instantiate()
-	powerup.position = position
-	get_tree().current_scene.add_child(powerup)
+	powerup.powerup_type = randi() % 3
+	scene.add_child(powerup)
+	powerup.global_position = drop_position
 
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("player_bullet"):

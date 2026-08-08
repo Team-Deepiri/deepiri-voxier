@@ -158,6 +158,7 @@ func activate() -> void:
 	add_to_group("rocket")
 	remove_from_group("rocket_pickup")
 	exploding = false
+	is_rescue_pickup = false
 	visible = true
 	current_timer = GameManager.rocket_timer
 	start_y = position.y

@@ -39,18 +39,29 @@ func _apply_visual() -> void:
 	var mat := _mesh.get_active_material(0) as StandardMaterial3D
 	if mat == null:
 		return
+	var district_tint := Color.WHITE
+	var env := Outer.sample()
+	if env.district_id != "":
+		district_tint = env.flame_color
+	mat.albedo_color = district_tint
 	match enemy_type:
 		EnemyType.DRONE:
-			mat.albedo_color = Color(1.0, 0.35, 0.42)
-			_tint = mat.albedo_color
+			mat.albedo_color = Color(1.0, 0.35, 0.42).lerp(district_tint, 0.45)
+		EnemyType.FIGHTER:
+			mat.albedo_color = Color(0.55, 0.85, 1.0).lerp(district_tint, 0.45)
+		EnemyType.MOTHER:
+			mat.albedo_color = Color(0.82, 0.45, 1.0).lerp(district_tint, 0.45)
+	_tint = mat.albedo_color
+	_scale_visual()
+
+
+func _scale_visual() -> void:
+	match enemy_type:
+		EnemyType.DRONE:
 			scale = Vector3.ONE
 		EnemyType.FIGHTER:
-			mat.albedo_color = Color(0.55, 0.85, 1.0)
-			_tint = mat.albedo_color
 			scale = Vector3(1.15, 1.15, 1.15)
 		EnemyType.MOTHER:
-			mat.albedo_color = Color(0.82, 0.45, 1.0)
-			_tint = mat.albedo_color
 			scale = Vector3(1.55, 1.55, 1.55)
 
 
@@ -117,7 +128,7 @@ func die() -> void:
 	EventBus.camera_shake_requested.emit(0.14)
 	EventBus.sfx_requested.emit(&"enemy_die")
 	GameManager.add_score(score_value)
-	if enemy_type == EnemyType.MOTHER and randf() < 0.32:
+	if randf() < 0.25:
 		spawn_powerup()
 	queue_free()
 
@@ -126,9 +137,13 @@ func spawn_powerup() -> void:
 	var arena := get_tree().current_scene.get_node_or_null("%Arena") as Node3D
 	if arena == null:
 		return
+	_add_powerup.call_deferred(arena, global_position)
+
+func _add_powerup(arena: Node3D, drop_position: Vector3) -> void:
 	var powerup: Area3D = load("res://scenes/powerup_3d.tscn").instantiate()
+	powerup.powerup_type = randi() % 3
 	arena.add_child(powerup)
-	powerup.global_position = global_position
+	powerup.global_position = drop_position
 
 
 

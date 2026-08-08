@@ -1,20 +1,25 @@
 extends Node2D
 
 const _Scenes := preload("res://scripts/ui/scene_registry.gd")
+const _UiAudio := preload("res://scripts/audio/ui_audio.gd")
 
 @onready var player: CharacterBody2D = $Player
 @onready var rocket: Node2D = $Rocket
-@onready var bg_manager: Node2D = $BackgroundManager
+@onready var bg_manager: Node2D = $WorldContainer/BackgroundManager
 @onready var dir_controller: Node = $DirectionController
 @onready var spawner: Node = $EnemySpawner
 @onready var camera: Camera2D = $Camera2D
 
 @onready var settings_btn: Button = $UI/StartPanel/VBox/SettingsBtn
 @onready var cat_btn: Button = $UI/StartPanel/VBox/CatBtn
+@onready var fox_btn: Button = $UI/StartPanel/VBox/FoxBtn
+@onready var _ui_root: CanvasLayer = $UI
 @onready var _speed_lines: CPUParticles2D = $SpeedFX/SpeedLines
 
-func _ready():
+func _ready() -> void:
+	_UiAudio.wire_buttons_in(_ui_root)
 	settings_btn.pressed.connect(_on_settings_pressed)
+	fox_btn.pressed.connect(_on_rocket_pressed)
 	cat_btn.pressed.connect(_on_cat_pressed)
 
 
@@ -33,6 +38,9 @@ func _on_settings_pressed():
 
 func _on_cat_pressed():
 	get_tree().change_scene_to_file(_Scenes.CAT_PILOT)
+	
+func _on_rocket_pressed():
+	get_tree().change_scene_to_file(_Scenes.MAIN)
 
 func _on_start_pressed():
 	GameManager.start_game()
