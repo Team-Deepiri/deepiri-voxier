@@ -21,7 +21,12 @@ run_godot() {
 }
 
 echo "==> Importing Godot project"
-run_godot --headless --path "$PROJECT" --import
+# Godot 4.2 often exits 1 after a successful headless --import; don't abort on that.
+run_godot --headless --path "$PROJECT" --import || true
+if [[ ! -d "$PROJECT/.godot" ]]; then
+  echo "Godot import failed: missing $PROJECT/.godot" >&2
+  exit 1
+fi
 
 case "$(uname -s)" in
   Linux)
