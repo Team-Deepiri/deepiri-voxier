@@ -10,8 +10,7 @@ const MAX_TILT := 0.18
 const LUNGE_AMP := 0.08
 const SQUASH_MAX := 0.07
 const ImpactParticles3D := preload("res://scripts/juice/impact_particles_3d.gd")
-
-enum PowerupType { RAPID, SHIELD, MULTI }
+const PowerupType := preload("res://scripts/game_enums.gd").PowerupType
 
 var move_vel := Vector3.ZERO
 var current_rocket: Node3D

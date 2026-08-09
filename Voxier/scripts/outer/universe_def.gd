@@ -20,6 +20,7 @@ class District:
 	var drag_mod := 1.0
 	var turbulence := 0.0
 	var speed_mult := 1.0
+	var menace := 1.0
 
 	var flame_color := Color(1.0, 0.55, 0.12)
 	var ambient := 1.0
@@ -71,6 +72,7 @@ class Sample:
 	var drag_mod := 1.0
 	var turbulence := 0.0
 	var speed_mult := 1.0
+	var menace := 1.0
 	var flame_color := Color(1.0, 0.55, 0.12)
 	var particle_color := Color(1.0, 0.55, 0.12)
 	var ambient := 1.0
@@ -144,9 +146,10 @@ func sample(d: float) -> Sample:
 		s.drag_mod /= weights
 		s.speed_mult /= weights
 		s.ambient /= weights
-		s.flame_olor /= weights
+		s.flame_color /= weights
 	if top:
 		s.district_id = top.id
 		s.district_title = top.title
 		s.pool = top.pool
+		s.menace = top.menace
 	return s

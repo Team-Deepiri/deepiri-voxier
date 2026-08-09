@@ -10,6 +10,14 @@ var active_count := 0
 var is_spawning := false
 
 
+func current_menace() -> float:
+	return Outer.sample().menace
+
+
+func active_limit() -> int:
+	return MAX_ENEMIES + int(round((current_menace() - 1.0) * 6.0))
+
+
 func _ready() -> void:
 	add_to_group("enemy_spawner")
 
@@ -20,7 +28,8 @@ func _process(delta: float) -> void:
 	spawn_timer -= delta
 	if spawn_timer <= 0:
 		spawn_enemy()
-		spawn_timer = max(MIN_INTERVAL, SPAWN_INTERVAL - difficulty * 0.035)
+		var menace := current_menace()
+		spawn_timer = max(MIN_INTERVAL, (SPAWN_INTERVAL - difficulty * 0.035) / menace)
 		difficulty += 0.04 * delta
 
 
@@ -39,7 +48,7 @@ func get_active_enemy_count() -> int:
 
 
 func spawn_enemy() -> void:
-	if active_count >= MAX_ENEMIES:
+	if active_count >= active_limit():
 		return
 	var scene := get_tree().current_scene
 	if scene == null:
