@@ -1,12 +1,14 @@
 shader_type canvas_item;
 render_mode unshaded;
 
-uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
+uniform sampler2D screen_texture : hint_screen_texture, filter_nearest;
 /// How much barrel / "looking up the shaft" perspective vs flat (0 = flat).
 uniform float perspective_mix : hint_range(0.0, 1.0) = 0.5;
 /// Horizontal wobble from forward speed.
 uniform float speed_streak : hint_range(0.0, 1.0) = 0.0;
 uniform float chroma_strength : hint_range(0.0, 0.02) = 0.0045;
+/// Retro-block size in screen pixels (0 = no pixelation).
+uniform float pixel : hint_range(0.0, 14.0) = 3.0;
 
 vec2 warp_perspective(vec2 uv) {
 	vec2 focus = vec2(0.5, 1.12);
@@ -21,6 +23,12 @@ void fragment() {
 	vec2 warped = mix(uv, warp_perspective(uv), perspective_mix);
 	warped.x += sin(warped.y * 32.0 + TIME * 22.0) * 0.0014 * speed_streak;
 	warped = clamp(warped, vec2(0.001), vec2(0.999));
+
+	if (pixel > 0.001) {
+		vec2 res = 1.0 / SCREEN_PIXEL_SIZE;
+		vec2 blocks = res / pixel;
+		warped = (floor(warped * blocks) + 0.5) / blocks;
+	}
 
 	vec3 col = texture(screen_texture, warped).rgb;
 	float ax = chroma_strength * (0.35 + speed_streak);
