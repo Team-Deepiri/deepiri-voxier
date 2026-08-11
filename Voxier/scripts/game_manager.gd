@@ -94,6 +94,16 @@ func _bind_scene_nodes() -> void:
 	enemy_spawner = get_tree().get_first_node_in_group("enemy_spawner")
 
 
+## Active 2D player only when the current mode is 2D, else null.
+func current_player_2d() -> CharacterBody2D:
+	return get_player_2d() if _isflat else null
+
+
+## Active 3D player only when the current mode is 3D, else null.
+func current_player_3d() -> CharacterBody3D:
+	return get_player_3d() if not _isflat else null
+
+
 func _process(delta: float) -> void:
 	if state != GameState.PLAYING and state != GameState.FALLING:
 		return
@@ -111,6 +121,7 @@ func start_game(reset_progress: bool = true) -> void:
 	# so it stays correct even if scene names/registry entries drift.
 
 	_set_state(GameState.PLAYING)
+	Outer.reset_run()
 	EventBus.sfx_requested.emit(&"game_start")
 	if reset_progress:
 		score = tune.starting_score
@@ -123,11 +134,18 @@ func start_game(reset_progress: bool = true) -> void:
 	ui_start.visible = false
 	ui_gameover.visible = false
 
-	if player:
-		player.revive()
-		player.visible = true
-		player.falling = false
-		player.clear_hit_stun()
+	var p2 := current_player_2d()
+	var p3 := current_player_3d()
+	if p2:
+		p2.revive()
+		p2.visible = true
+		p2.falling = false
+		p2.clear_hit_stun()
+	if p3:
+		p3.revive()
+		p3.visible = true
+		p3.falling = false
+		p3.clear_hit_stun()
 
 	current_rocket = get_tree().get_first_node_in_group("rocket")
 	if current_rocket and player:
@@ -164,9 +182,16 @@ func on_rocket_exploded():
 	pickup_ttl = 4.8
 	ui_rocket_warning.visible = true
 
-	if player:
-		player.dismount_rocket()
-		player.falling = true
+	var p2 := current_player_2d()
+	var p3 := current_player_3d()
+	if p2:
+		p2.dismount_rocket()
+		p2.falling = true
+		_set_state(GameState.FALLING)
+		fall_height = 0.0
+	if p3:
+		p3.dismount_rocket()
+		p3.falling = true
 		_set_state(GameState.FALLING)
 		fall_height = 0.0
 
@@ -248,7 +273,9 @@ func lose_life():
 func on_player_hit() -> void:
 	if state != GameState.PLAYING:
 		return
-	if player and player.is_invulnerable():
+	var p2 := current_player_2d()
+	var p3 := current_player_3d()
+	if p2 and p2.is_invulnerable() or p3 and p3.is_invulnerable():
 		return
 	lives -= 1
 	EventBus.camera_shake_requested.emit(0.52)
@@ -273,8 +300,12 @@ func on_player_hit() -> void:
 
 func player_die_game_over() -> void:
 	EventBus.sfx_requested.emit(&"player_die")
-	if player:
-		player.die_visual_only()
+	var p2 := current_player_2d()
+	var p3 := current_player_3d()
+	if p2:
+		p2.die_visual_only()
+	if p3:
+		p3.die_visual_only()
 	game_over()
 
 

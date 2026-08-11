@@ -7,6 +7,17 @@ const H := 288
 
 
 static func create_texture() -> ImageTexture:
+	return ImageTexture.create_from_image(build_image())
+
+
+## Retro variant: posterized color bands so the 2D fox reads chunky, not vector-smooth.
+static func create_pixel_texture() -> ImageTexture:
+	var img := build_image()
+	_posterize(img, 8.0)
+	return ImageTexture.create_from_image(img)
+
+
+static func build_image() -> Image:
 	var img := Image.create(W, H, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
 	_body_and_belly(img)
@@ -15,7 +26,20 @@ static func create_texture() -> ImageTexture:
 	_eyes_nose(img)
 	_fur_noise(img)
 	_outline(img)
-	return ImageTexture.create_from_image(img)
+	return img
+
+
+static func _posterize(img: Image, bands: float) -> void:
+	for y in range(H):
+		for x in range(W):
+			var c := img.get_pixel(x, y)
+			if c.a <= 0.0:
+				continue
+			c.r = roundf(c.r * bands) / bands
+			c.g = roundf(c.g * bands) / bands
+			c.b = roundf(c.b * bands) / bands
+			c.a = 1.0
+			img.set_pixel(x, y, c)
 
 
 static func absi(v: int) -> int:
@@ -35,14 +59,14 @@ static func _body_and_belly(img: Image) -> void:
 			if _in_ellipse(x, y, cx, 168.0, 52.0, 44.0):
 				var t := (float(y) - 130.0) / 80.0
 				t = clampf(t, 0.0, 1.0)
-				var deep := Color(0.52, 0.22, 0.06, 1.0)
-				var mid := Color(0.95, 0.48, 0.14, 1.0)
-				var lit := Color(1.0, 0.62, 0.28, 1.0)
+				var deep := Color(0.16, 0.07, 0.28, 1.0)
+				var mid := Color(0.32, 0.15, 0.5, 1.0)
+				var lit := Color(0.45, 0.25, 0.65, 1.0)
 				var c := deep.lerp(mid, smoothstep(0.0, 0.55, t)).lerp(lit, smoothstep(0.45, 1.0, t))
 				img.set_pixel(x, y, c)
 			elif _in_ellipse(x, y, cx, 178.0, 34.0, 28.0):
 				var h := float(absi(hash(Vector2i(x, y))) % 997) / 997.0
-				var c2 := Color(0.98, 0.88, 0.72, 1.0).lerp(Color(0.85, 0.72, 0.55, 1.0), h * 0.35)
+				var c2 := Color(0.5, 0.36, 0.62, 1.0).lerp(Color(0.42, 0.3, 0.52, 1.0), h * 0.35)
 				img.set_pixel(x, y, c2)
 
 
@@ -51,37 +75,67 @@ static func _shirt_backpack(img: Image) -> void:
 		for x in range(88, 168):
 			if x >= 108 and x <= 148:
 				var g := smoothstep(150.0, 205.0, float(y))
-				img.set_pixel(x, y, Color(0.12, 0.48, 0.32, 1.0).lerp(Color(0.22, 0.62, 0.4, 1.0), g))
+				img.set_pixel(x, y, Color(0.72, 0.3, 0.08, 1.0).lerp(Color(0.95, 0.45, 0.12, 1.0), g))
 	for y in range(155, 205):
 		for x in range(72, 102):
 			if x + y * 0.12 < 118.0:
-				img.set_pixel(x, y, Color(0.38, 0.2, 0.1, 1.0))
+				img.set_pixel(x, y, Color(0.55, 0.24, 0.07, 1.0))
 
 
 static func _head_ears(img: Image) -> void:
 	var cx := W * 0.5
+	_ear_tri(img, cx, -1.0)
+	_ear_tri(img, cx, +1.0)
 	for y in range(40, 140):
 		for x in range(W):
 			if _in_ellipse(x, y, cx, 102.0, 46.0, 44.0):
 				var shade := smoothstep(40.0, 120.0, float(y))
-				var c := Color(0.55, 0.24, 0.08, 1.0).lerp(Color(1.0, 0.55, 0.2, 1.0), shade * 0.85)
+				var c := Color(0.2, 0.09, 0.33, 1.0).lerp(Color(0.42, 0.22, 0.6, 1.0), shade * 0.85)
 				img.set_pixel(x, y, c)
-	_ear_tri(img, cx - 52.0, 72.0, -1.0)
-	_ear_tri(img, cx + 52.0, 72.0, 1.0)
 
 
-static func _ear_tri(img: Image, tip_x: float, tip_y: float, side: float) -> void:
-	for y in range(28, 92):
+static func _rot(p: Vector2, pivot: Vector2, ang: float) -> Vector2:
+	var d := p - pivot
+	var ca := cos(ang)
+	var sa := sin(ang)
+	return pivot + Vector2(d.x * ca - d.y * sa, d.x * sa + d.y * ca)
+
+
+static func _in_tri(ix: int, iy: int, a: Vector2, b: Vector2, c: Vector2) -> bool:
+	var px := float(ix)
+	var py := float(iy)
+	var d1 := (px - b.x) * (a.y - b.y) - (a.x - b.x) * (py - b.y)
+	var d2 := (px - c.x) * (b.y - c.y) - (b.x - c.x) * (py - c.y)
+	var d3 := (px - a.x) * (c.y - a.y) - (c.x - a.x) * (py - a.y)
+	var neg := d1 < 0.0 or d2 < 0.0 or d3 < 0.0
+	var pos := d1 > 0.0 or d2 > 0.0 or d3 > 0.0
+	return not (neg and pos)
+
+
+static func _ear_tri(img: Image, cx: float, side: float) -> void:
+	var tip := Vector2(cx + side * 22.0, 32.0)
+	var base_l := Vector2(cx + side * 50.0, 84.0)
+	var base_r := Vector2(cx + side * 6.0, 84.0)
+
+	var pivot := (base_l + base_r) / 2.0
+	var ang := 0.275 * side
+	tip = _rot(tip, pivot, ang)
+	base_l = _rot(base_l, pivot, ang)
+	base_r = _rot(base_r, pivot, ang)
+
+	var i_tip := tip
+	var i_bl := base_l.lerp(tip, 0.18)
+	var i_br := base_r.lerp(tip, 0.18)
+
+	for y in range(H):
 		for x in range(W):
-			var base_x := tip_x + side * 22.0
-			var t := float(y - 28) / 64.0
-			if t < 0.0 or t > 1.0:
-				continue
-			var half_w := lerpf(28.0, 6.0, t)
-			if absf(float(x) - lerpf(base_x, tip_x, t)) < half_w:
-				var c := Color(0.98, 0.98, 1.0, 1.0).lerp(Color(0.92, 0.5, 0.18, 1.0), t * 0.55)
+			if _in_tri(x, y, i_tip, i_bl, i_br):
+				img.set_pixel(x, y, Color(0.95, 0.45, 0.12, 1.0))
+			elif _in_tri(x, y, tip, base_l, base_r):
 				var p := img.get_pixel(x, y)
 				if p.a < 0.5:
+					var shade := smoothstep(40.0, 120.0, float(y))
+					var c := Color(0.2, 0.09, 0.33, 1.0).lerp(Color(0.42, 0.22, 0.6, 1.0), shade * 0.85)
 					img.set_pixel(x, y, c)
 
 
@@ -90,13 +144,13 @@ static func _eyes_nose(img: Image) -> void:
 	for y in range(86, 108):
 		for x in range(W):
 			if _in_ellipse(x, y, cx - 22.0, 96.0, 14.0, 10.0) or _in_ellipse(x, y, cx + 22.0, 96.0, 14.0, 10.0):
-				img.set_pixel(x, y, Color(0.96, 0.96, 1.0, 1.0))
+				img.set_pixel(x, y, Color(0.95, 0.5, 0.12, 1.0))
 			elif _in_ellipse(x, y, cx - 20.0, 98.0, 5.0, 5.0) or _in_ellipse(x, y, cx + 24.0, 98.0, 5.0, 5.0):
 				img.set_pixel(x, y, Color(0.06, 0.06, 0.1, 1.0))
 	for y in range(104, 122):
 		for x in range(int(cx) - 14, int(cx) + 14):
 			if float(y) > 104.0 + absf(float(x) - cx) * 0.55:
-				img.set_pixel(x, y, Color(0.1, 0.07, 0.06, 1.0))
+				img.set_pixel(x, y, Color(0.1, 0.06, 0.12, 1.0))
 
 
 static func _fur_noise(img: Image) -> void:
@@ -124,5 +178,4 @@ static func _outline(img: Image) -> void:
 				if copy.get_pixel(x + o.x, y + o.y).a < 0.2:
 					nbr += 1
 			if nbr > 0:
-				img.set_pixel(x, y, Color(0.18, 0.08, 0.04, 1.0).lerp(c, 0.35))
-
+				img.set_pixel(x, y, Color(0.07, 0.03, 0.12, 1.0).lerp(c, 0.35))

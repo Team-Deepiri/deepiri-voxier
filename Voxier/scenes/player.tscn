@@ -18,31 +18,31 @@ script = ExtResource("1")
 [node name="Body" type="Polygon2D" parent="."]
 position = Vector2(0, 10)
 color = Color(1, 0.4, 0, 1)
-polygon = PackedVector2Array([-18, -10, 18, -10, 18, 10, -18, 10])
+polygon = PackedVector2Array(-18, -10, 18, -10, 18, 10, -18, 10)
 
 [node name="Head" type="Polygon2D" parent="."]
 position = Vector2(0, -12)
 color = Color(1, 0.4, 0, 1)
-polygon = PackedVector2Array([-12, -8, 12, -8, 12, 8, -12, 8])
+polygon = PackedVector2Array(-12, -8, 12, -8, 12, 8, -12, 8)
 
 [node name="Ears" type="Polygon2D" parent="."]
 color = Color(1, 1, 1, 1)
-polygon = PackedVector2Array([-8, -18, -4, -24, 0, -18, 0, -18, 4, -24, 8, -18])
+polygon = PackedVector2Array(-8, -18, -4, -24, 0, -18, 0, -18, 4, -24, 8, -18)
 
 [node name="Tail" type="Polygon2D" parent="."]
 position = Vector2(0, 12)
 color = Color(1, 1, 1, 1)
-polygon = PackedVector2Array([-6, -6, 6, -6, 10, 8, -10, 8])
+polygon = PackedVector2Array(-6, -6, 6, -6, 10, 8, -10, 8)
 
 [node name="Backpack" type="Polygon2D" parent="."]
 position = Vector2(-12, 0)
 color = Color(0.55, 0.27, 0.13, 1)
-polygon = PackedVector2Array([-5, -10, 3, -10, 3, 10, -5, 10])
+polygon = PackedVector2Array(-5, -10, 3, -10, 3, 10, -5, 10)
 
 [node name="Shirt" type="Polygon2D" parent="."]
 position = Vector2(-8, -2)
 color = Color(0.27, 0.67, 0.27, 1)
-polygon = PackedVector2Array([0, 0, 18, 0, 18, 14, 0, 14])
+polygon = PackedVector2Array(0, 0, 18, 0, 18, 14, 0, 14)
 
 [node name="FirePoint" type="Marker2D" parent="."]
 position = Vector2(0, -25)

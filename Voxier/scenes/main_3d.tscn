@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/arcade3/direction_controller_3d.gd" id="4_dir"]
 [ext_resource type="Script" path="res://scripts/arcade3/camera_3d_juice.gd" id="5_cam"]
 [ext_resource type="Script" path="res://scripts/arcade3/camera_pivot_3d.gd" id="6_piv"]
+[ext_resource type="Script" path="res://scripts/arcade3/speed_streak_3d.gd" id="9_str"]
 [ext_resource type="PackedScene" uid="uid://pl3d001" path="res://scenes/player_3d.tscn" id="7_pl"]
 [ext_resource type="PackedScene" uid="uid://rk3d001" path="res://scenes/rocket_3d.tscn" id="8_rk"]
 
@@ -81,6 +82,22 @@ target_path = NodePath("../Arena/Player")
 current = true
 fov = 62.0
 script = ExtResource("5_cam")
+
+[node name="SpeedStreaks" type="CPUParticles3D" parent="CameraPivot/Camera3D"]
+emitting = false
+amount = 40
+lifetime = 1.15
+emission_shape = 0
+position = Vector3(0, 0, 0)
+direction = Vector3(0, 0, -1)
+spread = 24.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 9.0
+initial_velocity_max = 22.0
+scale_amount_min = 0.03
+scale_amount_max = 0.11
+color = Color(0.7, 0.85, 1, 0.5)
+script = ExtResource("9_str")
 
 [node name="UI" type="CanvasLayer" parent="."]
 layer = 12

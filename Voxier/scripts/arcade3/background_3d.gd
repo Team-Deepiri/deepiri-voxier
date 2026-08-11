@@ -25,6 +25,17 @@ func _ready() -> void:
 	_build_parallax_band()
 	_build_stars()
 	apply_profile(_Catalog.profile_at(0), false)
+	Outer.district_changed.connect(_on_district_changed)
+
+
+func _on_district_changed(from: StringName, to: StringName) -> void:
+	var env := Outer.sample()
+	apply_profile(_Catalog.profile_for_theme(to), true)
+	if _world_env and _world_env.environment:
+		var e := _world_env.environment
+		e.ambient_light_energy = clampf(env.ambient, 0.2, 2.5)
+	EventBus.camera_shake_requested.emit(0.1)
+	EventBus.sfx_requested.emit(&"rotate")
 
 
 func _find_floor_mesh() -> MeshInstance3D:
