@@ -4,10 +4,15 @@ const MOVE_SPEED := 300.0
 const FIRE_COOLDOWN := 0.11
 const RAPID_FIRE_COOLDOWN := 0.05
 const POWERUP_DURATION := 6.0
+const BOB_AMP := 4.0
+const BOB_FREQ := 13.0
+const MAX_TILT := 0.18
+const LUNGE_AMP := 5.0
+const SQUASH_MAX := 0.07
 const ImpactParticles := preload("res://scripts/juice/impact_particles.gd")
 const _RimShader := preload("res://shaders/fox_sprite_rim.gdshader")
 
-enum PowerupType { RAPID, SHIELD, MULTI }
+const PowerupType := preload("res://scripts/game_enums.gd").PowerupType
 
 var move_vel := Vector2.ZERO
 var current_rocket: Node2D
@@ -19,6 +24,8 @@ var _hero: Sprite2D
 var _active_powerup := -1
 var _powerup_timer := 0.0
 var _shield: Polygon2D
+var _walk_phase := 0.0
+var _hero_base_y := 0.0
 
 @onready var body: Polygon2D = $Body
 @onready var head: Polygon2D = $Head
@@ -108,6 +115,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	position.x = clampf(position.x, 40, 760)
 	position.y = clampf(position.y, 200, 560)
+	_update_movement_anim(delta)
 	if Input.is_action_pressed("fire") and fire_point and _fire_cd <= 0.0:
 		fire()
 		_fire_cd = FIRE_COOLDOWN if _active_powerup != PowerupType.RAPID else RAPID_FIRE_COOLDOWN
@@ -124,6 +132,23 @@ func _spawn_bullet(pos: Vector2) -> void:
 	bullet.position = pos
 	bullet.is_player_bullet = true
 	get_tree().current_scene.add_child(bullet)
+
+
+func _update_movement_anim(delta: float) -> void:
+	if not _hero:
+		return
+	var speed_ratio := move_vel.length() / MOVE_SPEED
+	var moving := speed_ratio > 0.05
+	if moving:
+		_walk_phase += delta * BOB_FREQ * (0.55 + 0.45 * speed_ratio)
+	else:
+		_walk_phase += delta * 2.5
+	var bob_amp := BOB_AMP * speed_ratio if moving else 1.4
+	_hero.position.y = _hero_base_y + sin(_walk_phase) * bob_amp
+	_hero.position.x = LUNGE_AMP * (move_vel.x / MOVE_SPEED) * speed_ratio
+	_hero.rotation = lerpf(_hero.rotation, (move_vel.x / MOVE_SPEED) * MAX_TILT, 1.0 - exp(-14.0 * delta))
+	var sq := SQUASH_MAX * absf(move_vel.x / MOVE_SPEED)
+	_hero.scale = Vector2(0.44 * (1.0 - sq), 0.44 * (1.0 + sq))
 
 func mount_rocket(rocket_node: Node2D) -> void:
 	current_rocket = rocket_node
@@ -160,16 +185,17 @@ func revive() -> void:
 func _setup_hero_sprite() -> void:
 	_hero = Sprite2D.new()
 	_hero.name = "HeroSprite"
-	_hero.texture = FoxTextureBuilder.create_texture()
+	_hero.texture = FoxTextureBuilder.create_pixel_texture()
 	_hero.centered = true
 	_hero.position = Vector2(0, -6)
 	_hero.scale = Vector2(0.44, 0.44)
-	_hero.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_hero.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var rim := ShaderMaterial.new()
 	rim.shader = _RimShader
 	rim.set_shader_parameter("rim", 0.42)
 	_hero.material = rim
 	add_child(_hero)
+	_hero_base_y = _hero.position.y
 	for c in get_children():
 		if c is Polygon2D:
 			(c as CanvasItem).visible = false

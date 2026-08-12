@@ -25,6 +25,7 @@ EventBus="*res://scripts/autoload/event_bus.gd"
 GameAudio="*res://scripts/autoload/game_audio.gd"
 DeepiriPaths="*res://scripts/autoload/deepiri_paths.gd"
 GameManager="*res://scripts/game_manager.gd"
+Outer="*res://scripts/outer/outer_world.gd"
 
 [display]
 

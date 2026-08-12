@@ -4,9 +4,13 @@ const MOVE_SPEED := 7.5
 const FIRE_COOLDOWN := 0.11
 const RAPID_FIRE_COOLDOWN := 0.05
 const POWERUP_DURATION := 6.0
+const BOB_AMP := 0.05
+const BOB_FREQ := 13.0
+const MAX_TILT := 0.18
+const LUNGE_AMP := 0.08
+const SQUASH_MAX := 0.07
 const ImpactParticles3D := preload("res://scripts/juice/impact_particles_3d.gd")
-
-enum PowerupType { RAPID, SHIELD, MULTI }
+const PowerupType := preload("res://scripts/game_enums.gd").PowerupType
 
 var move_vel := Vector3.ZERO
 var current_rocket: Node3D
@@ -18,6 +22,10 @@ var _hero: Sprite3D
 var _active_powerup := -1
 var _powerup_timer := 0.0
 var _shield: MeshInstance3D
+var _hero_pivot: Node3D
+var _walk_phase := 0.0
+var _hero_base_y := 0.0
+var _flip := 1
 @onready var _mesh: MeshInstance3D = $MeshInstance3D
 var _mesh_mat: StandardMaterial3D
 #mesh mat to add color/flashes without changing texture
@@ -55,7 +63,12 @@ func _setup_hero_sprite() -> void:
 	sm.albedo_texture = _hero.texture
 	sm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	_hero.material_override = sm
-	add_child(_hero)
+	var pivot := Node3D.new()
+	pivot.name = "HeroPivot"
+	_hero_pivot = pivot
+	add_child(pivot)
+	pivot.add_child(_hero)
+	_hero_base_y = _hero.position.y
 
 
 func is_invulnerable() -> bool:
@@ -142,10 +155,11 @@ func _physics_process(delta: float) -> void:
 	global_position.z = clampf(global_position.z, Arena3D.Z_MIN, Arena3D.Z_MAX)
 	
 	if velocity.x < -0.05:
-		_hero.scale.x = -1
+		_flip = -1
 	elif velocity.x > 0.05:
-		_hero.scale.x = 1
-		
+		_flip = 1
+	_update_movement_anim(delta)
+
 	if Input.is_action_pressed("fire") and fire_point and _fire_cd <= 0.0:
 		fire()
 		_fire_cd = FIRE_COOLDOWN if _active_powerup != PowerupType.RAPID else RAPID_FIRE_COOLDOWN
@@ -166,6 +180,26 @@ func _spawn_bullet(pos: Vector3, arena: Node3D) -> void:
 	arena.add_child(bullet)
 	bullet.global_position = pos
 	bullet.is_player_bullet = true
+
+
+func _update_movement_anim(delta: float) -> void:
+	if not _hero:
+		return
+	var speed_ratio := move_vel.length() / MOVE_SPEED
+	var moving := speed_ratio > 0.05
+	if moving:
+		_walk_phase += delta * BOB_FREQ * (0.55 + 0.45 * speed_ratio)
+	else:
+		_walk_phase += delta * 2.5
+	var bob_amp := BOB_AMP * speed_ratio if moving else 0.02
+	_hero.position.y = _hero_base_y + sin(_walk_phase) * bob_amp
+	_hero.position.x = LUNGE_AMP * (move_vel.x / MOVE_SPEED) * speed_ratio
+	var cam := get_viewport().get_camera_3d()
+	if cam and _hero_pivot:
+		var lean := (move_vel.x / MOVE_SPEED) * MAX_TILT
+		_hero_pivot.basis = Basis(Quaternion(-cam.global_basis.z, lean))
+	var sq := SQUASH_MAX * absf(move_vel.x / MOVE_SPEED)
+	_hero.scale = Vector3(_flip * (1.0 - sq), 1.0 + sq, 1.0)
 
 
 func mount_rocket(rocket_node: Node3D) -> void:

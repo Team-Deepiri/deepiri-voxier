@@ -39,18 +39,29 @@ func _apply_visual() -> void:
 	var mat := _mesh.get_active_material(0) as StandardMaterial3D
 	if mat == null:
 		return
+	var district_tint := Color.WHITE
+	var env := Outer.sample()
+	if env.district_id != "":
+		district_tint = env.flame_color
+	mat.albedo_color = district_tint
 	match enemy_type:
 		EnemyType.DRONE:
-			mat.albedo_color = Color(1.0, 0.35, 0.42)
-			_tint = mat.albedo_color
+			mat.albedo_color = Color(1.0, 0.35, 0.42).lerp(district_tint, 0.45)
+		EnemyType.FIGHTER:
+			mat.albedo_color = Color(0.55, 0.85, 1.0).lerp(district_tint, 0.45)
+		EnemyType.MOTHER:
+			mat.albedo_color = Color(0.82, 0.45, 1.0).lerp(district_tint, 0.45)
+	_tint = mat.albedo_color
+	_scale_visual()
+
+
+func _scale_visual() -> void:
+	match enemy_type:
+		EnemyType.DRONE:
 			scale = Vector3.ONE
 		EnemyType.FIGHTER:
-			mat.albedo_color = Color(0.55, 0.85, 1.0)
-			_tint = mat.albedo_color
 			scale = Vector3(1.15, 1.15, 1.15)
 		EnemyType.MOTHER:
-			mat.albedo_color = Color(0.82, 0.45, 1.0)
-			_tint = mat.albedo_color
 			scale = Vector3(1.55, 1.55, 1.55)
 
 
