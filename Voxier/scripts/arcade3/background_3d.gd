@@ -15,12 +15,17 @@ var _parallax_far: MeshInstance3D
 var _tween: Tween
 var _world_env: WorldEnvironment
 var _floor_mesh: MeshInstance3D
+var _sky_pivot: Node3D
+var _parallax_dist := 32.0
 
 
 func _ready() -> void:
 	add_to_group("background_manager")
 	_world_env = get_tree().current_scene.get_node_or_null("WorldEnvironment") as WorldEnvironment
 	_floor_mesh = _find_floor_mesh()
+	_sky_pivot = Node3D.new()
+	_sky_pivot.name = "SkyPivot"
+	add_child(_sky_pivot)
 	_build_sky_dome()
 	_build_parallax_band()
 	_build_stars()
@@ -46,17 +51,19 @@ func _find_floor_mesh() -> MeshInstance3D:
 
 
 func _build_sky_dome() -> void:
-	var quad := MeshInstance3D.new()
-	quad.name = "SkyBackdrop"
-	var mesh := QuadMesh.new()
-	mesh.size = Vector2(90.0, 42.0)
-	quad.mesh = mesh
+	var dome := MeshInstance3D.new()
+	dome.name = "SkyBackdrop"
+	var mesh := SphereMesh.new()
+	mesh.radius = 55.0
+	mesh.height = 110.0
+	mesh.radial_segments = 48
+	mesh.rings = 24
+	dome.mesh = mesh
 	_sky_mat = ShaderMaterial.new()
 	_sky_mat.shader = _SkyShader
-	quad.material_override = _sky_mat
-	quad.position = Vector3(0.0, 8.0, 38.0)
-	quad.rotation_degrees.y = 180.0
-	add_child(quad)
+	dome.material_override = _sky_mat
+	dome.position = Vector3(0.0, 0.0, 0.0)
+	_sky_pivot.add_child(dome)
 
 
 func _build_parallax_band() -> void:
@@ -71,9 +78,9 @@ func _build_parallax_band() -> void:
 	mat.albedo_color = Color(1, 1, 1, 0.22)
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	_parallax_far.material_override = mat
-	_parallax_far.position = Vector3(0.0, 4.5, 32.0)
+	_parallax_far.position = Vector3(0.0, 4.5, 0.0)
 	_parallax_far.rotation_degrees.y = 180.0
-	add_child(_parallax_far)
+	_sky_pivot.add_child(_parallax_far)
 
 
 func _build_stars() -> void:
@@ -108,6 +115,7 @@ func _process(delta: float) -> void:
 		return
 	if profile == null:
 		return
+	_follow_camera()
 	var mul := 1.0
 	if GameManager.state == GameManager.GameState.FALLING:
 		mul = profile.stress_speed_mul
@@ -120,9 +128,9 @@ func _process(delta: float) -> void:
 		_floor_mat.set_shader_parameter("scroll_speed", profile.floor_scroll_speed * mul)
 		_floor_mat.set_shader_parameter("rotation_kick", _rotation_kick)
 	if _parallax_far:
-		_parallax_far.position.z += scroll * 0.15
-		if _parallax_far.position.z > 46.0:
-			_parallax_far.position.z = 28.0
+		_parallax_dist += scroll * 0.15
+		if _parallax_dist > 46.0:
+			_parallax_dist = 28.0
 	for c in _stars.get_children():
 		if c is Node3D:
 			var spd := float(c.get_meta("speed", 5.0))
@@ -130,6 +138,23 @@ func _process(delta: float) -> void:
 			if c.position.z > 48.0:
 				c.position.z = -8.0
 				c.position.x = randf_range(-18.0, 18.0)
+
+
+func _follow_camera() -> void:
+	if _sky_pivot == null:
+		return
+	var cam := get_viewport().get_camera_3d()
+	if cam == null:
+		return
+	_sky_pivot.global_position = cam.global_position + _shift_offset
+	if _parallax_far:
+		var fwd := -cam.global_transform.basis.z
+		fwd.y = 0.0
+		fwd = fwd.normalized()
+		if fwd.length() < 0.001:
+			fwd = Vector3(0.0, 0.0, 1.0)
+		_parallax_far.global_position = cam.global_position + fwd * _parallax_dist + Vector3(0.0, 4.5, 0.0)
+		_parallax_far.global_rotation = Vector3(0.0, cam.global_rotation.y, 0.0)
 
 
 func apply_profile(next: BackgroundProfile, tween_colors: bool = true) -> void:

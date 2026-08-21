@@ -20,6 +20,7 @@ shader = ExtResource("10_cine")
 shader_parameter/perspective_mix = 0.5
 shader_parameter/speed_streak = 0.0
 shader_parameter/chroma_strength = 0.0045
+shader_parameter/pixel = 0.0
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
