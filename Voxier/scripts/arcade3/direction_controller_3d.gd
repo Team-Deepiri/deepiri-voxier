@@ -1,7 +1,7 @@
 extends Node
 
 var current_dir := 0
-var target_screen_angle := 0.0
+var cumulative_angle := 0.0
 var is_rotating := false
 
 const ROTATION_DURATION := 0.8
@@ -42,13 +42,13 @@ func _process(_delta: float) -> void:
 
 func turn(direction: int) -> void:
 	current_dir = (current_dir + direction + 8) % 8
-	target_screen_angle = current_dir * DIR_STEP
+	cumulative_angle += direction * DIR_STEP
 	is_rotating = true
 	if rot_tween:
 		rot_tween.kill()
 	rot_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	if _arena:
-		rot_tween.tween_property(_arena, "rotation_degrees:y", target_screen_angle, ROTATION_DURATION)
+		rot_tween.tween_property(_arena, "rotation_degrees:y", cumulative_angle, ROTATION_DURATION)
 	apply_shift()
 	rot_tween.finished.connect(finish_rotation, CONNECT_ONE_SHOT)
 
@@ -75,7 +75,7 @@ func get_direction_name() -> String:
 
 func reset() -> void:
 	current_dir = 0
-	target_screen_angle = 0.0
+	cumulative_angle = 0.0
 	is_rotating = false
 	if _arena:
 		_arena.rotation_degrees = Vector3(0, 0, 0)
