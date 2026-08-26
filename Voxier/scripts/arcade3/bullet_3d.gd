@@ -4,6 +4,10 @@ extends Area3D
 @export var damage := 1
 @export var is_player_bullet := true
 
+## Optional flight direction (normalized in _ready). Player bullets ignore it
+## and always fly +Z; enemy bullets fall back to straight -Z when unset.
+var custom_direction := Vector3.ZERO
+
 var velocity := Vector3.ZERO
 
 func _ready() -> void:
@@ -12,7 +16,10 @@ func _ready() -> void:
 		velocity = Vector3(0, 0, speed)
 	else:
 		add_to_group("enemy_bullet")
-		velocity = Vector3(0, 0, -speed)
+		if custom_direction != Vector3.ZERO:
+			velocity = custom_direction.normalized() * speed
+		else:
+			velocity = Vector3(0, 0, -speed)
 	var lt := get_node_or_null("Lifetime") as Timer
 	if lt:
 		lt.start()
