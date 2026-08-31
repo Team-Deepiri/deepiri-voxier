@@ -79,9 +79,23 @@ jobs:
           # The first pass populates the registry; the second resolves them.
           # --import can exit non-zero even when it worked, so status is ignored
           # and the real check is that .godot/ exists.
-          godot --headless --import || true
+          # `--import` alone does not reliably build the global class_name registry
+          # (.godot/global_script_class_cache.cfg). Without it, any script that
+          # references a `class_name` declared in ANOTHER file fails to parse:
+          #   Parse Error: Could not find type "UniverseDef" in the current scope
+          # even though universe_def.gd does declare `class_name UniverseDef`.
+          #
+          # Opening the editor headless and quitting is what actually populates
+          # that cache. Run it first, then import.
+          godot --headless --editor --quit || true
           godot --headless --import || true
           test -d .godot || { echo "::error::import produced no .godot/ cache"; exit 1; }
+
+          if [ -f .godot/global_script_class_cache.cfg ]; then
+            echo "class cache built, $(grep -c 'class=' .godot/global_script_class_cache.cfg || echo 0) classes registered"
+          else
+            echo "::warning::global_script_class_cache.cfg was not created — class_name types will not resolve"
+          fi
 
           # Surface any parse errors that survived the second pass. Not fatal —
           # they may predate this workflow — but they must not be silent, because
