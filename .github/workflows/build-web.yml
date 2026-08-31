@@ -1,0 +1,146 @@
+# Builds the Godot Web (HTML5) export and publishes it as a container image
+# serving the static output.
+#
+# Built in CI rather than on the VPS deliberately: the export pulls ~1GB of
+# templates and is CPU-heavy, and the box has 4 vCPU already running the whole
+# platform stack.
+name: Build Voxier Web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Voxier/**'
+      - 'deploy/**'
+      - '.github/workflows/build-web.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: build-voxier-web
+  cancel-in-progress: false
+
+env:
+  # Must match .godot-version exactly — export templates are version-locked and
+  # a mismatch fails the export with an unhelpful message.
+  GODOT_VERSION: 4.2.2
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify engine version matches .godot-version
+        run: |
+          set -euo pipefail
+          declared=$(tr -d '[:space:]' < .godot-version)
+          expected="${GODOT_VERSION}.stable"
+          if [ "$declared" != "$expected" ]; then
+            echo "::error::.godot-version is '$declared' but this workflow installs '$expected'."
+            echo "Export templates are version-locked; bump GODOT_VERSION to match."
+            exit 1
+          fi
+          echo "engine version agrees: $declared"
+
+      - name: Install Godot ${{ env.GODOT_VERSION }} + export templates
+        run: |
+          set -euo pipefail
+          BASE="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          curl -fsSL -o godot.zip "${BASE}/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl -fsSL -o templates.tpz "${BASE}/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+
+          unzip -q godot.zip
+          sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+          sudo chmod +x /usr/local/bin/godot
+
+          # Templates must land in this exact path or the export cannot find them.
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          unzip -q templates.tpz
+          mv templates/* "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          godot --version
+
+      - name: Import project
+        working-directory: Voxier
+        run: |
+          set -euo pipefail
+          # A fresh checkout has no .godot/ import cache. Exporting without
+          # importing first produces a build with missing resources. --import
+          # can exit non-zero even when it succeeded, so its status is ignored
+          # and the real check is that .godot/ now exists.
+          # Import runs TWICE on purpose. On a cold checkout Godot has no
+          # class_name registry yet, so scripts referencing a `class_name` type
+          # defined in another file fail to parse on the first pass:
+          #   Parse Error: Could not find type "UniverseDef" in the current scope
+          # The first pass populates the registry; the second resolves them.
+          # --import can exit non-zero even when it worked, so status is ignored
+          # and the real check is that .godot/ exists.
+          # `--import` alone does not reliably build the global class_name registry
+          # (.godot/global_script_class_cache.cfg). Without it, any script that
+          # references a `class_name` declared in ANOTHER file fails to parse:
+          #   Parse Error: Could not find type "UniverseDef" in the current scope
+          # even though universe_def.gd does declare `class_name UniverseDef`.
+          #
+          # Opening the editor headless and quitting is what actually populates
+          # that cache. Run it first, then import.
+          godot --headless --editor --quit || true
+          godot --headless --import || true
+          test -d .godot || { echo "::error::import produced no .godot/ cache"; exit 1; }
+
+          if [ -f .godot/global_script_class_cache.cfg ]; then
+            echo "class cache built, $(grep -c 'class=' .godot/global_script_class_cache.cfg || echo 0) classes registered"
+          else
+            echo "::warning::global_script_class_cache.cfg was not created — class_name types will not resolve"
+          fi
+
+          # Surface any parse errors that survived the second pass. Not fatal —
+          # they may predate this workflow — but they must not be silent, because
+          # a script that fails to load still exports and then breaks at runtime.
+          if godot --headless --import 2>&1 | grep -q "Parse Error"; then
+            echo "::warning::GDScript parse errors persist after two import passes — the exported build may fail at runtime"
+            godot --headless --import 2>&1 | grep "Parse Error" | sort -u | head -20
+          else
+            echo "no parse errors after import"
+          fi
+
+      - name: Export Web build
+        working-directory: Voxier
+        run: |
+          set -euo pipefail
+          mkdir -p build/web
+          godot --headless --export-release "Web" build/web/index.html
+          # Godot can exit 0 having written nothing useful — assert the real artefacts.
+          for f in index.html index.wasm index.pck index.js; do
+            test -s "build/web/$f" || { echo "::error::missing or empty build/web/$f"; exit 1; }
+          done
+          echo "web export contents:"
+          ls -lh build/web/
+
+      # The default 'docker' driver cannot export a gha cache:
+      #   ERROR: failed to build: Cache export is not supported for the docker driver
+      # setup-buildx gives us the docker-container driver, which can.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./deploy/Dockerfile.web
+          push: true
+          tags: |
+            ghcr.io/team-deepiri/deepiri-voxier-web:latest
+            ghcr.io/team-deepiri/deepiri-voxier-web:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
