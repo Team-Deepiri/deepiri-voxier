@@ -22,9 +22,11 @@ RUN printf '%s\n' \
   '    add_header Cross-Origin-Embedder-Policy require-corp always;' \
   '    add_header Cross-Origin-Resource-Policy same-origin always;' \
   '' \
-  '    # .wasm must be served with the correct type or streaming compilation' \
-  '    # falls back to a slower path, or fails outright in some browsers.' \
-  '    types { application/wasm wasm; }' \
+  '    # NO types{} block here. A types block in server context REPLACES the' \
+  '    # entire inherited MIME map rather than adding to it, so declaring just' \
+  '    # wasm made nginx serve index.html as application/octet-stream, so the' \
+  '    # browser downloaded the page instead of rendering it. The default' \
+  '    # /etc/nginx/mime.types is included at http level and already maps wasm.' \
   '' \
   '    location = /health { access_log off; return 200 "healthy\\n"; }' \
   '' \
