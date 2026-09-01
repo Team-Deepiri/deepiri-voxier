@@ -85,10 +85,7 @@ func _bind_scene_nodes() -> void:
 		ui_gameover = scene.get_node_or_null("%GameOverPanel") as Control
 		ui_finalscore = scene.get_node_or_null("%FinalScoreLabel") as Label
 	player = get_tree().get_first_node_in_group("player")
-	if player:
-		_isflat = player is CharacterBody2D
-	else:
-			player is CharacterBody3D
+	_isflat = player is CharacterBody2D
 	direction_controller = get_tree().get_first_node_in_group("direction_controller")
 	background_manager = get_tree().get_first_node_in_group("background_manager")
 	enemy_spawner = get_tree().get_first_node_in_group("enemy_spawner")
@@ -148,15 +145,15 @@ func start_game(reset_progress: bool = true) -> void:
 		p3.clear_hit_stun()
 
 	current_rocket = get_tree().get_first_node_in_group("rocket")
-	if current_rocket and player:
-		if _isflat:
+	if current_rocket:
+		if p2:
 			# 2D player's mount_rocket() positions the rocket itself.
-			player.mount_rocket(current_rocket)
+			p2.mount_rocket(current_rocket)
 			current_rocket.activate()
-		else:
-			current_rocket.global_position = player.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
+		elif p3:
+			current_rocket.global_position = p3.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
 			current_rocket.activate()
-			player.mount_rocket(current_rocket)
+			p3.mount_rocket(current_rocket)
 
 	if enemy_spawner:
 		enemy_spawner.start_spawning()
@@ -198,23 +195,24 @@ func on_rocket_exploded():
 
 func handle_falling(delta: float) -> void:
 	fall_height += 80 * delta
-	if player:
-		if _isflat:
-			player.position.y += 2.8 * delta
-		else:
-			player.global_position.z -= 2.8 * delta
+	var p2 := current_player_2d()
+	var p3 := current_player_3d()
+	if p2:
+		p2.position.y += 2.8 * delta
+	if p3:
+		p3.global_position.z -= 2.8 * delta
 	if has_new_rocket and new_rocket:
 		pickup_ttl -= delta
 		if pickup_ttl <= 0.0:
 			missed_rocket()
 			return
 		var caught := false
-		if _isflat:
-			caught = player.global_position.distance_to(new_rocket.global_position) < _Arena3D.RESCUE_LAND_RADIUS
-		else:
-			var p2 := Vector2(player.global_position.x, player.global_position.z)
+		if p2:
+			caught = p2.global_position.distance_to(new_rocket.global_position) < _Arena3D.RESCUE_LAND_RADIUS
+		elif p3:
+			var pp := Vector2(p3.global_position.x, p3.global_position.z)
 			var r2 := Vector2(new_rocket.global_position.x, new_rocket.global_position.z)
-			caught = p2.distance_to(r2) < _Arena3D.RESCUE_LAND_RADIUS
+			caught = pp.distance_to(r2) < _Arena3D.RESCUE_LAND_RADIUS
 		if caught:
 			catch_rocket()
 			return
@@ -229,15 +227,20 @@ func catch_rocket():
 	EventBus.sfx_requested.emit(&"pickup")
 	current_rocket = new_rocket
 
-	if _isflat:
-		player.mount_rocket(current_rocket)
+	var p2 := current_player_2d()
+	var p3 := current_player_3d()
+	if p2:
+		p2.mount_rocket(current_rocket)
 		current_rocket.activate()
-	else:
-		current_rocket.global_position = player.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
+	if p3:
+		current_rocket.global_position = p3.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
 		current_rocket.activate()
-		player.mount_rocket(current_rocket)
+		p3.mount_rocket(current_rocket)
 
-	player.falling = false
+	if p2:
+		p2.falling = false
+	if p3:
+		p3.falling = false
 	has_new_rocket = false
 	new_rocket = null
 
@@ -281,17 +284,16 @@ func on_player_hit() -> void:
 	EventBus.camera_shake_requested.emit(0.52)
 	EventBus.sfx_requested.emit(&"hurt")
 
-	if _isflat:
+	if p2:
 		var scene := get_tree().current_scene
-		if scene and player:
-			_ImpactParticles2D.burst(scene, player.global_position, Color(1, 0.45, 0.55), 22)
-	else:
+		if scene:
+			_ImpactParticles2D.burst(scene, p2.global_position, Color(1, 0.45, 0.55), 22)
+			p2.apply_hit_stun()
+	if p3:
 		var arena := get_tree().current_scene.get_node_or_null("%Arena") as Node3D
-		if arena and player:
-			_ImpactParticles3D.burst(arena, player.global_position + Vector3(0, 0.4, 0), Color(1, 0.45, 0.55), 22)
-
-	if player:
-		player.apply_hit_stun()
+		if arena:
+			_ImpactParticles3D.burst(arena, p3.global_position + Vector3(0, 0.4, 0), Color(1, 0.45, 0.55), 22)
+			p3.apply_hit_stun()
 	if lives <= 0:
 		player_die_game_over()
 	else:
@@ -320,14 +322,16 @@ func hop_to_rocket():
 
 	current_rocket = new_rocket
 
-	if _isflat:
+	var p2 := current_player_2d()
+	var p3 := current_player_3d()
+	if p2:
 		# 2D player's mount_rocket() positions the rocket itself.
-		player.mount_rocket(current_rocket)
+		p2.mount_rocket(current_rocket)
 		current_rocket.activate()
-	else:
-		current_rocket.global_position = player.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
+	if p3:
+		current_rocket.global_position = p3.global_position + _Arena3D.ROCKET_MOUNT_OFFSET
 		current_rocket.activate()
-		player.mount_rocket(current_rocket)
+		p3.mount_rocket(current_rocket)
 
 	has_new_rocket = false
 	new_rocket = null
@@ -340,11 +344,10 @@ func hop_to_rocket():
 
 	_set_state(GameState.PLAYING)
 
-	if player and not _isflat:
-		#player._mesh
-		player.set_tint(Color(1.15, 1.12, 1.05, 1))
-		var tw := player.create_tween()
-		tw.tween_property(player._mesh_mat, "albedo_color", Color.WHITE, 0.22)
+	if p3:
+		p3.set_tint(Color(1.15, 1.12, 1.05, 1))
+		var tw := p3.create_tween()
+		tw.tween_property(p3._mesh_mat, "albedo_color", Color.WHITE, 0.22)
 	if background_manager and background_manager.has_method("cycle_background"):
 		background_manager.cycle_background()
 
