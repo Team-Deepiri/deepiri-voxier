@@ -4,6 +4,10 @@ extends RefCounted
 ## All functions return desired velocities or forces; callers integrate them
 ## with capped acceleration so nothing teleports or jitters.
 
+## Boundary ramp band: the soft push reaches full strength this far past the
+## margin line, then saturates.
+const BOUNDARY_RAMP := 1.5
+
 
 static func seek(pos: Vector3, target: Vector3, max_speed: float) -> Vector3:
 	var dir := target - pos
@@ -66,9 +70,9 @@ static func boundary_force(pos: Vector3, x_min: float, x_max: float, z_min: floa
 
 static func _axis_push(v: float, lo: float, hi: float, strength: float) -> float:
 	if v < lo:
-		return strength * minf(1.0, (lo - v) / 1.5)
+		return strength * minf(1.0, (lo - v) / BOUNDARY_RAMP)
 	if v > hi:
-		return -strength * minf(1.0, (v - hi) / 1.5)
+		return -strength * minf(1.0, (v - hi) / BOUNDARY_RAMP)
 	return 0.0
 
 

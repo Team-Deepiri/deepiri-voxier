@@ -9,6 +9,7 @@ var spawn_timer := 0.0
 var difficulty := 1.0
 var active_count := 0
 var is_spawning := false
+var enemies: Array = []
 
 
 func current_menace() -> float:
@@ -48,6 +49,10 @@ func get_active_enemy_count() -> int:
 	return active_count
 
 
+func get_enemies() -> Array:
+	return enemies
+
+
 func spawn_enemy() -> void:
 	if active_count >= active_limit():
 		return
@@ -65,7 +70,8 @@ func spawn_enemy() -> void:
 	enemy.global_position = _ring_spawn_position()
 	
 	active_count += 1
-	enemy.tree_exiting.connect(_on_enemy_left_tree)
+	enemies.append(enemy)
+	enemy.tree_exiting.connect(_on_enemy_left_tree.bind(enemy))
 
 
 ## Horde ring: every spawn is at the player's flanks or ahead — nothing behind.
@@ -95,8 +101,9 @@ func _player_z() -> float:
 	return Arena3D.PLAYER_START.z
 
 
-func _on_enemy_left_tree() -> void:
+func _on_enemy_left_tree(enemy: Node) -> void:
 	active_count = maxi(0, active_count - 1)
+	enemies.erase(enemy)
 
 
 func get_weighted_type() -> int:

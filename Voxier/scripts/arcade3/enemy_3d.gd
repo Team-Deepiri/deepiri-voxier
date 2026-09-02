@@ -28,6 +28,7 @@ var _strafe_dir := 1
 var _strafe_flip_timer := 2.0
 var _menace_scale := 1.0
 var _neighbors: Array = []
+var _spawner: Node
 
 @onready var _mesh: MeshInstance3D = $MeshInstance3D
 var _mesh_mat: StandardMaterial3D
@@ -37,6 +38,7 @@ var _tint := Color.WHITE
 
 func _ready() -> void:
 	player = get_tree().get_first_node_in_group("player")
+	_spawner = get_tree().get_first_node_in_group("enemy_spawner")
 	add_to_group("enemy")
 	setup_enemy()
 	_apply_visual()
@@ -117,7 +119,7 @@ func _physics_process(delta: float) -> void:
 	if player and not is_instance_valid(player):
 		player = null
 
-	_neighbors = get_tree().get_nodes_in_group("enemy")
+	_neighbors = _spawner.get_enemies() if _spawner else get_tree().get_nodes_in_group("enemy")
 	var desired := _desired_velocity(delta)
 	_vel = _vel.move_toward(desired, accel * delta)
 	global_position += _vel * delta
