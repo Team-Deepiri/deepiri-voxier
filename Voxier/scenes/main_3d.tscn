@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://main3d001"]
+[gd_scene load_steps=14 format=3 uid="uid://main3d001"]
 
 [ext_resource type="Script" path="res://scripts/arcade3/main_3d.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/arcade3/background_3d.gd" id="2_bg"]
@@ -6,9 +6,9 @@
 [ext_resource type="Script" path="res://scripts/arcade3/direction_controller_3d.gd" id="4_dir"]
 [ext_resource type="Script" path="res://scripts/arcade3/camera_3d_juice.gd" id="5_cam"]
 [ext_resource type="Script" path="res://scripts/arcade3/camera_pivot_3d.gd" id="6_piv"]
-[ext_resource type="Script" path="res://scripts/arcade3/speed_streak_3d.gd" id="9_str"]
 [ext_resource type="PackedScene" uid="uid://pl3d001" path="res://scenes/player_3d.tscn" id="7_pl"]
 [ext_resource type="PackedScene" uid="uid://rk3d001" path="res://scenes/rocket_3d.tscn" id="8_rk"]
+[ext_resource type="Script" path="res://scripts/arcade3/speed_streak_3d.gd" id="9_str"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -61,7 +61,7 @@ surface_material_override/0 = SubResource("floor_mat")
 
 [node name="Player" parent="Arena" instance=ExtResource("7_pl")]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.35)
 
 [node name="Rocket" parent="Arena" instance=ExtResource("8_rk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.05)
@@ -73,7 +73,7 @@ script = ExtResource("3_sp")
 script = ExtResource("4_dir")
 
 [node name="CameraPivot" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.2, -12.5)
+transform = Transform3D(-1, 0, 0, 0, 0.978, 0.208, 0, 0.208, -0.978, 0, 7, -3.65)
 visible = false
 script = ExtResource("6_piv")
 target_path = NodePath("../Arena/Player")
@@ -87,8 +87,6 @@ script = ExtResource("5_cam")
 emitting = false
 amount = 40
 lifetime = 1.15
-emission_shape = 0
-position = Vector3(0, 0, 0)
 direction = Vector3(0, 0, -1)
 spread = 24.0
 gravity = Vector3(0, 0, 0)
