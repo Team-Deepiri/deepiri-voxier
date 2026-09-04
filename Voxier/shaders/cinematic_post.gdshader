@@ -3,7 +3,7 @@ render_mode unshaded;
 
 uniform sampler2D screen_texture : hint_screen_texture, filter_nearest;
 /// How much barrel / "looking up the shaft" perspective vs flat (0 = flat).
-uniform float perspective_mix : hint_range(0.0, 1.0) = 0.5;
+uniform float perspective_mix : hint_range(0.0, 1.0) = 0.0;
 /// Horizontal wobble from forward speed.
 uniform float speed_streak : hint_range(0.0, 1.0) = 0.0;
 uniform float chroma_strength : hint_range(0.0, 0.02) = 0.0045;

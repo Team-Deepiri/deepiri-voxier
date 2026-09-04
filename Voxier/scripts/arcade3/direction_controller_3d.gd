@@ -1,22 +1,23 @@
 extends Node
 
 var current_dir := 0
-var target_screen_angle := 0.0
+var cumulative_angle := 0.0
 var is_rotating := false
 
 const ROTATION_DURATION := 0.8
+const DIR_STEP := 45.0
 
 const DIRECTION_NAMES = ["NORTH", "NORTHEAST", "EAST", "SOUTHEAST", "SOUTH", "SOUTHWEST", "WEST", "NORTHWEST"]
 
 const SCREEN_ROTATIONS = {
-	0: { "angle": 0.0, "bg_shift": Vector2(0, 0) },
-	1: { "angle": 50.0, "bg_shift": Vector2(30, -15) },
-	2: { "angle": 90.0, "bg_shift": Vector2(50, 0) },
-	3: { "angle": 140.0, "bg_shift": Vector2(30, 15) },
-	4: { "angle": 180.0, "bg_shift": Vector2(0, 20) },
-	5: { "angle": 230.0, "bg_shift": Vector2(-30, 15) },
-	6: { "angle": 270.0, "bg_shift": Vector2(-50, 0) },
-	7: { "angle": 310.0, "bg_shift": Vector2(-30, -15) }
+	0: { "bg_shift": Vector2(0, 0) },
+	1: { "bg_shift": Vector2(30, -15) },
+	2: { "bg_shift": Vector2(50, 0) },
+	3: { "bg_shift": Vector2(30, 15) },
+	4: { "bg_shift": Vector2(0, 20) },
+	5: { "bg_shift": Vector2(-30, 15) },
+	6: { "bg_shift": Vector2(-50, 0) },
+	7: { "bg_shift": Vector2(-30, -15) }
 }
 
 var rot_tween: Tween
@@ -41,13 +42,13 @@ func _process(_delta: float) -> void:
 
 func turn(direction: int) -> void:
 	current_dir = (current_dir + direction + 8) % 8
-	target_screen_angle = SCREEN_ROTATIONS[current_dir]["angle"]
+	cumulative_angle += direction * DIR_STEP
 	is_rotating = true
 	if rot_tween:
 		rot_tween.kill()
 	rot_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	if _arena:
-		rot_tween.tween_property(_arena, "rotation_degrees:y", target_screen_angle, ROTATION_DURATION)
+		rot_tween.tween_property(_arena, "rotation_degrees:y", cumulative_angle, ROTATION_DURATION)
 	apply_shift()
 	rot_tween.finished.connect(finish_rotation, CONNECT_ONE_SHOT)
 
@@ -74,7 +75,7 @@ func get_direction_name() -> String:
 
 func reset() -> void:
 	current_dir = 0
-	target_screen_angle = 0.0
+	cumulative_angle = 0.0
 	is_rotating = false
 	if _arena:
 		_arena.rotation_degrees = Vector3(0, 0, 0)

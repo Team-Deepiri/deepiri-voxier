@@ -1,13 +1,15 @@
 extends Node
 
-const MAX_ENEMIES := 18
+const MAX_ENEMIES := 28
 const SPAWN_INTERVAL := 1.85
 const MIN_INTERVAL := 0.42
+const SPAWN_RING_OFFSET := 2.2
 
 var spawn_timer := 0.0
 var difficulty := 1.0
 var active_count := 0
 var is_spawning := false
+var enemies: Array = []
 
 
 func current_menace() -> float:
@@ -47,6 +49,10 @@ func get_active_enemy_count() -> int:
 	return active_count
 
 
+func get_enemies() -> Array:
+	return enemies
+
+
 func spawn_enemy() -> void:
 	if active_count >= active_limit():
 		return
@@ -58,20 +64,46 @@ func spawn_enemy() -> void:
 		return
 	var etype := get_weighted_type()
 	var enemy: Area3D = load("res://scenes/enemy_3d.tscn").instantiate()
-	arena.add_child(enemy)
-	enemy.global_position = Vector3(
-		randf_range(Arena3D.X_MIN + 0.5, Arena3D.X_MAX - 0.5),
-		0.5,
-		randf_range(Arena3D.Z_ENEMY_SPAWN_MIN, Arena3D.Z_ENEMY_SPAWN_MAX)
-	)
+	# Assign the type BEFORE add_child so _ready()/setup_enemy() see it.
 	enemy.enemy_type = etype
+	arena.add_child(enemy)
+	enemy.global_position = _ring_spawn_position()
 	
 	active_count += 1
-	enemy.tree_exiting.connect(_on_enemy_left_tree)
+	enemies.append(enemy)
+	enemy.tree_exiting.connect(_on_enemy_left_tree.bind(enemy))
 
 
-func _on_enemy_left_tree() -> void:
+## Horde ring: every spawn is at the player's flanks or ahead — nothing behind.
+func _ring_spawn_position() -> Vector3:
+	var roll := randf()
+	var pz := _player_z()
+	var x := 0.0
+	var z := 0.0
+	if roll < 0.5:
+		# Far edge — most common
+		x = randf_range(Arena3D.X_MIN + 0.5, Arena3D.X_MAX - 0.5)
+		z = randf_range(Arena3D.Z_ENEMY_SPAWN_MIN, Arena3D.Z_ENEMY_SPAWN_MAX)
+	elif roll < 0.8:
+		# Side flanks — alongside the player, stretching forward
+		x = Arena3D.X_MIN - SPAWN_RING_OFFSET if randf() < 0.5 else Arena3D.X_MAX + SPAWN_RING_OFFSET
+		z = pz + randf_range(-2.0, 12.0)
+	else:
+		# Close flanks — right at the player's sides, least common
+		x = Arena3D.X_MIN - SPAWN_RING_OFFSET * 0.6 if randf() < 0.5 else Arena3D.X_MAX + SPAWN_RING_OFFSET * 0.6
+		z = pz + randf_range(-1.0, 2.0)
+	return Vector3(x, 0.5, z)
+
+
+func _player_z() -> float:
+	if GameManager.player:
+		return GameManager.player.global_position.z
+	return Arena3D.PLAYER_START.z
+
+
+func _on_enemy_left_tree(enemy: Node) -> void:
 	active_count = maxi(0, active_count - 1)
+	enemies.erase(enemy)
 
 
 func get_weighted_type() -> int:

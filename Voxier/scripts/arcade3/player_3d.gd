@@ -60,6 +60,7 @@ func _setup_hero_sprite() -> void:
 	var sm := StandardMaterial3D.new()
 	sm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	sm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	sm.cull_mode = BaseMaterial3D.CULL_DISABLED
 	sm.albedo_texture = _hero.texture
 	sm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	_hero.material_override = sm
